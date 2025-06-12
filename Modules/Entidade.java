@@ -1,13 +1,13 @@
 package Modules;
 
 public abstract class Entidade {
-    private int state;
+    private EstadosEnum state;
     private double X;
     private double Y;
     private double VX;
     private double VY;
 
-    public Entidade(int state, double x, double y, double VX, double VY) {
+    public Entidade(EstadosEnum state, double x, double y, double VX, double VY) {
         this.state = state;
         X = x;
         Y = y;
@@ -15,17 +15,17 @@ public abstract class Entidade {
         this.VY = VY;
     }
 
-    public Entidade(int state, double x, double y) {
+    public Entidade(EstadosEnum state, double x, double y) {
         this.state = state;
         X = x;
         Y = y;
     }
 
-    public int getState() {
+    public EstadosEnum getState() {
         return state;
     }
 
-    public void setState(int state) {
+    public void setState(EstadosEnum state) {
         this.state = state;
     }
 

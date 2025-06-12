@@ -4,6 +4,7 @@ import java.util.List;
 
 import Modules.*;
 
+
 /***********************************************************************/
 /*                                                                     */
 /* Para jogar:                                                         */
@@ -15,17 +16,14 @@ import Modules.*;
 /***********************************************************************/
 
 public class Main {
-	
-	/* Constantes relacionadas aos estados que os elementos   */
-	/* do jogo (player, projeteis ou inimigos) podem assumir. */
-	
-	public static final int INACTIVE = 0;
-	public static final int ACTIVE = 1;
-	public static final int EXPLODING = 2;
-	
 	/* Espera, sem fazer nada, até que o instante de tempo atual seja */
 	/* maior ou igual ao instante especificado no parâmetro "time.    */
-	
+
+	private static final int MAX_PROJETEIS_PLAYER = 10;
+	private static final int MAX_PROJETEIS_INIMIGOS = 200;
+	private static final int MAX_INIMIGOS_TIPO1 = 15;
+	private static final int MAX_INIMIGOS_TIPO2 = 15;
+
 	public static void busyWait(long time){
 		
 		while(System.currentTimeMillis() < time) Thread.yield();
@@ -34,17 +32,6 @@ public class Main {
 	/* Encontra e devolve o primeiro índice do  */
 	/* array referente a uma posição "inativa". */
 
-	public static int findFreeIndex(int [] stateArray){
-
-		int i;
-
-		for(i = 0; i < stateArray.length; i++){
-
-			if(stateArray[i] == INACTIVE) break;
-		}
-
-		return i;
-	}
 
 	public static <T extends Entidade> int findFreeIndex(List<T> stateArray){
 		
@@ -52,7 +39,7 @@ public class Main {
 		
 		for(i = 0; i < stateArray.size(); i++){
 			
-			if(stateArray.get(i).getState() == INACTIVE) break;
+			if(stateArray.get(i).getState() == EstadosEnum.INACTIVE) break;
 		}
 		
 		return i;
@@ -61,7 +48,7 @@ public class Main {
 
 	public static <T extends EnemyBase> int findFreeEnemyIndex(List<T> stateArray) {
 		for (int i = 0; i < stateArray.size(); i++) {
-			if (stateArray.get(i).getState() == INACTIVE) {
+			if (stateArray.get(i).getState() == EstadosEnum.INACTIVE) {
 				return i;
 			}
 		}
@@ -81,7 +68,7 @@ public class Main {
 		
 		for(i = 0, k = 0; i < stateArray.size() && k < amount; i++){
 				
-			if(stateArray.get(i).getState() == INACTIVE) {
+			if(stateArray.get(i).getState() == EstadosEnum.INACTIVE) {
 				
 				freeArray[k] = i; 
 				k++;
@@ -106,7 +93,7 @@ public class Main {
 
 		/* variáveis do player */
 
-		Player player = new Player(ACTIVE,
+		Player player = new Player(EstadosEnum.ACTIVE,
 				GameLib.WIDTH / 2,
 				GameLib.HEIGHT * 0.90,
 				0.25,
@@ -159,10 +146,10 @@ public class Main {
 		
 		/* inicializações */
 		
-		for(int i = 0; i < 10; i++) projetils.add(new Projetil(INACTIVE, 0.0, 0.0, 0.0, 0.0));
-		for(int i = 0; i < 200; i++) e_projetils.add(new Projetil(INACTIVE, 0.0, 0.0, 0.0, 0.0));
-		for (int i = 0; i < 10; i++) enemies.add(new Enemy1(INACTIVE, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 9.0, 0L));
-		for(int i = 0; i < 10; i++) enemies2.add(new Enemy2(INACTIVE, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 12.0, 0.0));
+		for(int i = 0; i < MAX_PROJETEIS_PLAYER; i++) projetils.add(new Projetil(EstadosEnum.INACTIVE, 0.0, 0.0, 0.0, 0.0, 2.0));
+		for(int i = 0; i < MAX_PROJETEIS_INIMIGOS ; i++) e_projetils.add(new Projetil(EstadosEnum.INACTIVE, 0.0, 0.0, 0.0, 0.0, 2.0));
+		for (int i = 0; i < MAX_INIMIGOS_TIPO1 ; i++) enemies.add(new Enemy1(EstadosEnum.INACTIVE, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 9.0, 0L));
+		for(int i = 0; i < MAX_INIMIGOS_TIPO2 ; i++) enemies2.add(new Enemy2(EstadosEnum.INACTIVE, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 12.0, 0.0));
 
 
 		for(int i = 0; i < background1_X.length; i++){
@@ -218,25 +205,12 @@ public class Main {
 			/* Verificação de colisões */
 			/***************************/
 						
-			if(player.getState() == ACTIVE){
+			if(player.getState() == EstadosEnum.ACTIVE){
 				
 				/* colisões player - projeteis (inimigo) */
-				
-				for(int i = 0; i < e_projetils.size(); i++){
-					
-					double dx = e_projetils.get(i).getX() - player.getX();
-					double dy = e_projetils.get(i).getY() - player.getY();
-					double dist = Math.sqrt(dx * dx + dy * dy);
-					
-					if(dist < (player.getRadius() + e_projectile_radius) * 0.8){
-						
-						player.setState(EXPLODING);
-						player.setExplosionStart(currentTime);
-						player.setExplosionEnd(currentTime + 2000);
-					}
-				}
-			
-				/* colisões player - inimigos */
+
+				player.MortePlayer(e_projetils, currentTime);
+
 							
 				for(int i = 0; i < enemies.size(); i++){
 					
@@ -245,7 +219,7 @@ public class Main {
 					double dist = Math.sqrt(dx * dx + dy * dy);
 					
 					if(dist < (player.getRadius() + enemies.get(i).getRadius()) * 0.8){
-						player.setState(EXPLODING);
+						player.setState(EstadosEnum.EXPLODING);
 						player.setExplosionStart(currentTime);
 						player.setExplosionEnd(currentTime + 2000);
 					}
@@ -259,7 +233,7 @@ public class Main {
 					
 					if(dist < (player.getRadius() + enemies2.get(i).getRadius()) * 0.8){
 
-						player.setState(EXPLODING);
+						player.setState(EstadosEnum.EXPLODING);
 						player.setExplosionStart(currentTime);
 						player.setExplosionEnd(currentTime + 2000);
 					}
@@ -272,7 +246,7 @@ public class Main {
 				
 				for(int i = 0; i < enemies.size(); i++){
 										
-					if(enemies.get(i).getState() == ACTIVE){
+					if(enemies.get(i).getState() == EstadosEnum.ACTIVE){
 					
 						double dx = enemies.get(i).getX() - projetils.get(k).getX();
 						double dy = enemies.get(i).getY() - projetils.get(k).getY();
@@ -280,7 +254,7 @@ public class Main {
 						
 						if(dist < enemies.get(i).getRadius()){
 
-							enemies.get(i).setState(EXPLODING);
+							enemies.get(i).setState(EstadosEnum.EXPLODING);
 							enemies.get(i).setExplosionStart(currentTime);
 							enemies.get(i).setExplosionEnd(currentTime + 500);
 						}
@@ -289,7 +263,7 @@ public class Main {
 				
 				for(int i = 0; i < enemies2.size(); i++){
 					
-					if(enemies2.get(i).getState() == ACTIVE){
+					if(enemies2.get(i).getState() == EstadosEnum.ACTIVE){
 						
 						double dx = enemies2.get(i).getX() - projetils.get(k).getX();
 						double dy = enemies2.get(i).getY() - projetils.get(k).getY();
@@ -297,7 +271,7 @@ public class Main {
 						
 						if(dist < enemies2.get(i).getRadius()){
 
-							enemies2.get(i).setState(EXPLODING);
+							enemies2.get(i).setState(EstadosEnum.EXPLODING);
 							enemies2.get(i).setExplosionStart(currentTime);
 							enemies2.get(i).setExplosionEnd(currentTime + 500);
 						}
@@ -313,12 +287,12 @@ public class Main {
 			
 			for(int i = 0; i < projetils.size(); i++){
 				
-				if(projetils.get(i).getState() == ACTIVE){
+				if(projetils.get(i).getState() == EstadosEnum.ACTIVE){
 					
 					/* verificando se projétil saiu da tela */
 					if(projetils.get(i).getY() < 0) {
 
-						projetils.get(i).setState(INACTIVE);
+						projetils.get(i).setState(EstadosEnum.INACTIVE);
 					}
 					else {
 
@@ -332,12 +306,12 @@ public class Main {
 			
 			for(int i = 0; i < e_projetils.size(); i++){
 				
-				if(e_projetils.get(i).getState() == ACTIVE){
+				if(e_projetils.get(i).getState() == EstadosEnum.ACTIVE){
 					
 					/* verificando se projétil saiu da tela */
 					if(e_projetils.get(i).getY() > GameLib.HEIGHT) {
 						
-						e_projetils.get(i).setState(INACTIVE);
+						e_projetils.get(i).setState(EstadosEnum.INACTIVE);
 					}
 					else {
 
@@ -351,20 +325,20 @@ public class Main {
 			
 			for(int i = 0; i < enemies.size(); i++){
 				
-				if(enemies.get(i).getState() == EXPLODING){
+				if(enemies.get(i).getState() == EstadosEnum.EXPLODING){
 					
 					if(currentTime > enemies.get(i).getExplosionEnd()){
 						
-						enemies.get(i).setState(INACTIVE);
+						enemies.get(i).setState(EstadosEnum.INACTIVE);
 					}
 				}
 				
-				if(enemies.get(i).getState() == ACTIVE){
+				if(enemies.get(i).getState() == EstadosEnum.ACTIVE){
 					
 					/* verificando se inimigo saiu da tela */
 					if(enemies.get(i).getY() > GameLib.HEIGHT + 10) {
 
-						enemies.get(i).setState(INACTIVE);
+						enemies.get(i).setState(EstadosEnum.INACTIVE);
 					}
 					else {
 					
@@ -382,7 +356,7 @@ public class Main {
 								e_projetils.get(free).setY(enemies.get(i).getY());
 								e_projetils.get(free).setVX(Math.cos(enemies.get(i).getAngle()) * 0.45);
 								e_projetils.get(free).setVY(Math.sin(enemies.get(i).getAngle()) * 0.45 * (-1.0));
-								e_projetils.get(free).setState(ACTIVE);
+								e_projetils.get(free).setState(EstadosEnum.ACTIVE);
 								
 								enemies.get(i).setNextShoot((long) (currentTime + 200 + Math.random() * 500));
 							}
@@ -395,20 +369,20 @@ public class Main {
 			
 			for(int i = 0; i < enemies2.size(); i++){
 				
-				if(enemies2.get(i).getState() == EXPLODING){
+				if(enemies2.get(i).getState() == EstadosEnum.EXPLODING){
 					
 					if(currentTime > enemies2.get(i).getExplosionEnd()){
 
-						enemies2.get(i).setState(INACTIVE);
+						enemies2.get(i).setState(EstadosEnum.INACTIVE);
 					}
 				}
 				
-				if(enemies2.get(i).getState() == ACTIVE){
+				if(enemies2.get(i).getState() == EstadosEnum.ACTIVE){
 					
 					/* verificando se inimigo saiu da tela */
 					if(	enemies2.get(i).getX() < -10 || enemies2.get(i).getX() > GameLib.WIDTH + 10 ) {
 
-						enemies2.get(i).setState(INACTIVE);
+						enemies2.get(i).setState(EstadosEnum.INACTIVE);
 					}
 					else {
 						
@@ -427,18 +401,16 @@ public class Main {
 							if(enemies2.get(i).getX() < GameLib.WIDTH / 2) enemies2.get(i).setRV(0.003);
 							else enemies2.get(i).setRV(-0.003);
 						}
-						
-						if(enemies2.get(i).getRV() > 0 && Math.abs(enemies.get(i).getAngle() - 3 * Math.PI) < 0.05){
 
+						if(enemies2.get(i).getRV() > 0 && Math.abs(enemies2.get(i).getAngle() - 3 * Math.PI) < 0.05){
 							enemies2.get(i).setRV(0.0);
-							enemies.get(i).setAngle(3 * Math.PI);
+							enemies2.get(i).setAngle(3 * Math.PI);
 							shootNow = true;
 						}
-						
-						if(enemies2.get(i).getRV() < 0 && Math.abs(enemies.get(i).getAngle()) < 0.05){
 
+						if(enemies2.get(i).getRV() < 0 && Math.abs(enemies2.get(i).getAngle()) < 0.05){
 							enemies2.get(i).setRV(0.0);
-							enemies.get(i).setAngle(0.0);
+							enemies2.get(i).setAngle(0.0);
 							shootNow = true;
 						}
 																		
@@ -457,11 +429,11 @@ public class Main {
 									double vx = Math.cos(a);
 									double vy = Math.sin(a);
 
-									enemies.get(free).setX(enemies2.get(i).getX());
-									enemies.get(free).setY(enemies2.get(i).getY());
+									e_projetils.get(free).setX(enemies2.get(i).getX());
+									e_projetils.get(free).setY(enemies2.get(i).getY());
 									e_projetils.get(free).setVX(vx * 0.30);
 									e_projetils.get(free).setVY(vy * 0.30);
-									e_projetils.get(free).setState(ACTIVE);
+									e_projetils.get(free).setState(EstadosEnum.ACTIVE);
 								}
 							}
 						}
@@ -482,7 +454,7 @@ public class Main {
 					enemies.get(free).setV(0.20 + Math.random() * 0.15);
 					enemies.get(free).setAngle((3 * Math.PI) / 2);
 					enemies.get(free).setRV(0.0);
-					enemies.get(free).setState(ACTIVE);
+					enemies.get(free).setState(EstadosEnum.ACTIVE);
 					enemies.get(free).setNextShoot(currentTime + 500);
 					nextEnemy1 = currentTime + 500;
 				}
@@ -501,7 +473,7 @@ public class Main {
 					enemies2.get(free).setV(0.42);
  					enemies2.get(free).setAngle((3 * Math.PI) / 2);
 					enemies2.get(free).setRV(0.0);
-					enemies2.get(free).setState(ACTIVE);
+					enemies2.get(free).setState(EstadosEnum.ACTIVE);
 
 					enemy2_count++;
 					
@@ -520,11 +492,11 @@ public class Main {
 			
 			/* Verificando se a explosão do player já acabou.         */
 			/* Ao final da explosão, o player volta a ser controlável */
-			if(player.getState() == EXPLODING){
+			if(player.getState() == EstadosEnum.EXPLODING){
 				
 				if(currentTime > player.getExplosionEnd()){
 					
-					player.setState(ACTIVE);
+					player.setState(EstadosEnum.ACTIVE);
 				}
 			}
 			
@@ -532,7 +504,7 @@ public class Main {
 			/* Verificando entrada do usuário (teclado) */
 			/********************************************/
 			
-			if(player.getState() == ACTIVE){
+			if(player.getState() == EstadosEnum.ACTIVE){
 				
 				if(GameLib.iskeyPressed(GameLib.KEY_UP)) player.setY(player.getY() - delta * player.getVY());
 				if(GameLib.iskeyPressed(GameLib.KEY_DOWN)) player.setY(player.getY() + delta * player.getVY());
@@ -551,7 +523,7 @@ public class Main {
                             projetils.get(free).setY(player.getY() - 2 * player.getRadius());
                             projetils.get(free).setVX(0.0);
                             projetils.get(free).setVY(-1.0);
-                            projetils.get(free).setState(ACTIVE);
+                            projetils.get(free).setState(EstadosEnum.ACTIVE);
 							player.setNextShot(currentTime + 100);
 						}
 					}	
@@ -594,7 +566,7 @@ public class Main {
 						
 			/* desenhando player */
 			
-			if(player.getState() == EXPLODING){
+			if(player.getState() == EstadosEnum.EXPLODING){
 				
 				double alpha = (currentTime - player.getExplosionStart()) / (player.getExplosionEnd() - player.getExplosionStart());
 				GameLib.drawExplosion(player.getX(), player.getY(), alpha);
@@ -609,7 +581,7 @@ public class Main {
 			
 			for(int i = 0; i < projetils.size(); i++){
 				
-				if(projetils.get(i).getState() == ACTIVE){
+				if(projetils.get(i).getState() == EstadosEnum.ACTIVE){
 					
 					GameLib.setColor(Color.GREEN);
 					GameLib.drawLine(projetils.get(i).getX(), projetils.get(i).getY() - 5, projetils.get(i).getX(), projetils.get(i).getY() + 5);
@@ -622,7 +594,7 @@ public class Main {
 		
 			for(int i = 0; i < e_projetils.size(); i++){
 				
-				if(e_projetils.get(i).getState() == ACTIVE){
+				if(e_projetils.get(i).getState() == EstadosEnum.ACTIVE){
 	
 					GameLib.setColor(Color.RED);
 					GameLib.drawCircle(e_projetils.get(i).getX(), e_projetils.get(i).getY(), e_projectile_radius);
@@ -633,13 +605,13 @@ public class Main {
 			
 			for(int i = 0; i < enemies.size(); i++){
 				
-				if(enemies.get(i).getState() == EXPLODING){
+				if(enemies.get(i).getState() == EstadosEnum.EXPLODING){
 					
 					double alpha = (currentTime - enemies.get(i).getExplosionStart()) / (enemies.get(i).getExplosionEnd() - enemies.get(i).getExplosionStart());
 					GameLib.drawExplosion(enemies.get(i).getX(), enemies.get(i).getY(), alpha);
 				}
 				
-				if(enemies.get(i).getState() == ACTIVE){
+				if(enemies.get(i).getState() == EstadosEnum.ACTIVE){
 			
 					GameLib.setColor(Color.CYAN);
 					GameLib.drawCircle(enemies.get(i).getX(), enemies.get(i).getY(), enemies.get(i).getRadius());
@@ -650,13 +622,13 @@ public class Main {
 			
 			for(int i = 0; i < enemies2.size(); i++){
 				
-				if(enemies2.get(i).getState() == EXPLODING){
+				if(enemies2.get(i).getState() == EstadosEnum.EXPLODING){
 
 					double alpha = (currentTime - enemies2.get(i).getExplosionStart()) / (enemies2.get(i).getExplosionEnd() - enemies2.get(i).getExplosionStart());
 					GameLib.drawExplosion(enemies2.get(i).getX(), enemies2.get(i).getY(), alpha);
 				}
 				
-				if(enemies2.get(i).getState() == ACTIVE){
+				if(enemies2.get(i).getState() == EstadosEnum.ACTIVE){
 			
 					GameLib.setColor(Color.MAGENTA);
 					GameLib.drawDiamond(enemies2.get(i).getX(), enemies2.get(i).getY(), enemies2.get(i).getRadius());

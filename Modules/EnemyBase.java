@@ -8,7 +8,7 @@ public abstract class EnemyBase extends Entidade {
     private double explosionEnd;
     private double radius;
 
-    public EnemyBase(int state, double x, double y, double v, double angle, double RV, double explosionStart, double explosionEnd, double radius) {
+    public EnemyBase(EstadosEnum state, double x, double y, double v, double angle, double RV, double explosionStart, double explosionEnd, double radius) {
         super(state, x, y);
         V = v;
         this.angle = angle;
