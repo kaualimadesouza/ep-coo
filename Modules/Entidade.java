@@ -15,6 +15,12 @@ public abstract class Entidade {
         this.VY = VY;
     }
 
+    public Entidade(int state, double x, double y) {
+        this.state = state;
+        X = x;
+        Y = y;
+    }
+
     public int getState() {
         return state;
     }
