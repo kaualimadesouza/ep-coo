@@ -77,6 +77,26 @@ public class Main {
 		
 		return freeArray;
 	}
+
+	public static void verificarColisoesInimigos(Projetil projetil, List<? extends EnemyBase> listaInimigos, long currentTime) {
+
+		// A lógica aqui dentro é EXATAMENTE A MESMA
+		for (EnemyBase inimigo : listaInimigos) {
+
+			if (inimigo.getState() == EstadosEnum.ACTIVE) {
+
+				double dx = inimigo.getX() - projetil.getX();
+				double dy = inimigo.getY() - projetil.getY();
+				double dist = Math.sqrt(dx * dx + dy * dy);
+
+				if (dist < inimigo.getRadius()) {
+					inimigo.setState(EstadosEnum.EXPLODING);
+					inimigo.setExplosionStart(currentTime);
+					inimigo.setExplosionEnd(currentTime + 500);
+				}
+			}
+		}
+	}
 	
 	/* Método principal */
 	
@@ -210,73 +230,15 @@ public class Main {
 				/* colisões player - projeteis (inimigo) */
 
 				player.MortePlayer(e_projetils, currentTime);
-
-							
-				for(int i = 0; i < enemies.size(); i++){
-					
-					double dx = enemies.get(i).getX() - player.getX();
-					double dy = enemies.get(i).getY() - player.getY();
-					double dist = Math.sqrt(dx * dx + dy * dy);
-					
-					if(dist < (player.getRadius() + enemies.get(i).getRadius()) * 0.8){
-						player.setState(EstadosEnum.EXPLODING);
-						player.setExplosionStart(currentTime);
-						player.setExplosionEnd(currentTime + 2000);
-					}
-				}
-				
-				for(int i = 0; i < enemies2.size(); i++){
-					
-					double dx = enemies2.get(i).getX() - player.getX();
-					double dy = enemies2.get(i).getY() - player.getY();
-					double dist = Math.sqrt(dx * dx + dy * dy);
-					
-					if(dist < (player.getRadius() + enemies2.get(i).getRadius()) * 0.8){
-
-						player.setState(EstadosEnum.EXPLODING);
-						player.setExplosionStart(currentTime);
-						player.setExplosionEnd(currentTime + 2000);
-					}
-				}
+				player.MortePlayer(enemies, currentTime);
+				player.MortePlayer(enemies2, currentTime);
 			}
 			
 			/* colisões projeteis (player) - inimigos */
-			
-			for(int k = 0; k < projetils.size(); k++){
-				
-				for(int i = 0; i < enemies.size(); i++){
-										
-					if(enemies.get(i).getState() == EstadosEnum.ACTIVE){
-					
-						double dx = enemies.get(i).getX() - projetils.get(k).getX();
-						double dy = enemies.get(i).getY() - projetils.get(k).getY();
-						double dist = Math.sqrt(dx * dx + dy * dy);
-						
-						if(dist < enemies.get(i).getRadius()){
 
-							enemies.get(i).setState(EstadosEnum.EXPLODING);
-							enemies.get(i).setExplosionStart(currentTime);
-							enemies.get(i).setExplosionEnd(currentTime + 500);
-						}
-					}
-				}
-				
-				for(int i = 0; i < enemies2.size(); i++){
-					
-					if(enemies2.get(i).getState() == EstadosEnum.ACTIVE){
-						
-						double dx = enemies2.get(i).getX() - projetils.get(k).getX();
-						double dy = enemies2.get(i).getY() - projetils.get(k).getY();
-						double dist = Math.sqrt(dx * dx + dy * dy);
-						
-						if(dist < enemies2.get(i).getRadius()){
-
-							enemies2.get(i).setState(EstadosEnum.EXPLODING);
-							enemies2.get(i).setExplosionStart(currentTime);
-							enemies2.get(i).setExplosionEnd(currentTime + 500);
-						}
-					}
-				}
+			for (Projetil projetil : projetils) {
+				verificarColisoesInimigos(projetil, enemies, currentTime);
+				verificarColisoesInimigos(projetil, enemies2, currentTime);
 			}
 				
 			/***************************/

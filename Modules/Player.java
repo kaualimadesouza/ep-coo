@@ -3,7 +3,6 @@ package Modules;
 import java.util.List;
 
 public class Player extends Entidade{
-    private double radius;
     private double explosionStart;
     private double explosionEnd;
     private long nextShot;
@@ -12,21 +11,20 @@ public class Player extends Entidade{
 
     public Player(EstadosEnum state, double x, double y, double VX, double VY,
                   double radius, double explosionStart, double explosionEnd, long nextShot) {
-        super(state, x, y, VX, VY); // chamada obrigatória
-        this.radius = radius;
+        super(state, x, y, VX, VY, radius);
         this.explosionStart = explosionStart;
         this.explosionEnd = explosionEnd;
         this.nextShot = nextShot;
     }
 
-    public void MortePlayer(List<Projetil> e_projetils, long currentTime) {
-        for(int i = 0; i < e_projetils.size(); i++){
+    public <T extends Entidade> void MortePlayer(List<T> entidade, long currentTime) {
+        for(int i = 0; i < entidade.size(); i++){
 
-            double dx = e_projetils.get(i).getX() - this.getX();
-            double dy = e_projetils.get(i).getY() - this.getY();
+            double dx = entidade.get(i).getX() - this.getX();
+            double dy = entidade.get(i).getY() - this.getY();
             double dist = Math.sqrt(dx * dx + dy * dy);
 
-            if(dist < (this.getRadius() + e_projetils.get(i).getRadius()) * 0.8){
+            if(dist < (this.getRadius() + entidade.get(i).getRadius()) * 0.8){
 
                 this.setState(EstadosEnum.EXPLODING);
                 this.setExplosionStart(currentTime);
@@ -35,13 +33,6 @@ public class Player extends Entidade{
         }
     }
 
-    public double getRadius() {
-        return radius;
-    }
-
-    public void setRadius(double radius) {
-        this.radius = radius;
-    }
 
     public double getExplosionStart() {
         return explosionStart;

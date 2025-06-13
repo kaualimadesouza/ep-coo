@@ -6,19 +6,30 @@ public abstract class Entidade {
     private double Y;
     private double VX;
     private double VY;
+    private double radius;
 
-    public Entidade(EstadosEnum state, double x, double y, double VX, double VY) {
+    public Entidade(EstadosEnum state, double x, double y, double VX, double VY, double radius) {
         this.state = state;
         X = x;
         Y = y;
         this.VX = VX;
         this.VY = VY;
+        this.radius = radius;
     }
 
-    public Entidade(EstadosEnum state, double x, double y) {
+    public Entidade(EstadosEnum state, double x, double y, double radius) {
         this.state = state;
         X = x;
         Y = y;
+        this.radius = radius;
+    }
+
+    public double getRadius() {
+        return radius;
+    }
+
+    public void setRadius(double radius) {
+        this.radius = radius;
     }
 
     public EstadosEnum getState() {

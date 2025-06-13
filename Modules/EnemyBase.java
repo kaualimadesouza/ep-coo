@@ -1,21 +1,21 @@
 package Modules;
 
+import java.util.List;
+
 public abstract class EnemyBase extends Entidade {
     private double V;
     private double angle;
     private double RV;
     private double explosionStart;
     private double explosionEnd;
-    private double radius;
 
     public EnemyBase(EstadosEnum state, double x, double y, double v, double angle, double RV, double explosionStart, double explosionEnd, double radius) {
-        super(state, x, y);
+        super(state, x, y, radius);
         V = v;
         this.angle = angle;
         this.RV = RV;
         this.explosionStart = explosionStart;
         this.explosionEnd = explosionEnd;
-        this.radius = radius;
     }
 
     public double getV() {
@@ -56,13 +56,5 @@ public abstract class EnemyBase extends Entidade {
 
     public void setExplosionEnd(double explosionEnd) {
         this.explosionEnd = explosionEnd;
-    }
-
-    public double getRadius() {
-        return radius;
-    }
-
-    public void setRadius(double radius) {
-        this.radius = radius;
     }
 }
