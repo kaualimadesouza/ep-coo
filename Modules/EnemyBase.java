@@ -18,6 +18,26 @@ public abstract class EnemyBase extends Entidade {
         this.explosionEnd = explosionEnd;
     }
 
+    public static void verificaColisaoComProjetil(Projetil projetil, List<? extends EnemyBase> listaInimigos, long currentTime) {
+        for (EnemyBase inimigo : listaInimigos) {
+
+            if (inimigo.getState() == EstadosEnum.ACTIVE) {
+
+                double dx = inimigo.getX() - projetil.getX();
+                double dy = inimigo.getY() - projetil.getY();
+                double dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < inimigo.getRadius()) {
+                    inimigo.setState(EstadosEnum.EXPLODING);
+                    inimigo.setExplosionStart(currentTime);
+                    inimigo.setExplosionEnd(currentTime + 500);
+                }
+            }
+        }
+    }
+
+
+
     public double getV() {
         return V;
     }
