@@ -6,16 +6,18 @@ import java.awt.*;
 import java.util.List;
 
 public class Player extends Entidade{
+    private int vida;
     private double explosionStart;
     private double explosionEnd;
     private long nextShot;
 
     public Player(EstadosEnum state, double x, double y, double VX, double VY,
-                  double radius, double explosionStart, double explosionEnd, long nextShot) {
+                  double radius, double explosionStart, double explosionEnd, long nextShot, int vida) {
         super(state, x, y, VX, VY, radius);
         this.explosionStart = explosionStart;
         this.explosionEnd = explosionEnd;
         this.nextShot = nextShot;
+        this.vida = vida;
     }
 
     public void verificaSeExplosaoAcabou(long currentTime) {
@@ -150,5 +152,9 @@ public class Player extends Entidade{
 
     public void setNextShot(long nextShot) {
         this.nextShot = nextShot;
+    }
+
+    public int getVida() {
+        return vida;
     }
 }

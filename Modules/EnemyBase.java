@@ -18,7 +18,7 @@ public abstract class EnemyBase extends Entidade {
         this.explosionEnd = explosionEnd;
     }
 
-    public static void verificaColisaoComProjetil(Projetil projetil, List<? extends EnemyBase> listaInimigos, long currentTime) {
+    public static boolean verificaColisaoComProjetil(Projetil projetil, List<? extends EnemyBase> listaInimigos, long currentTime) {
         for (EnemyBase inimigo : listaInimigos) {
 
             if (inimigo.getState() == EstadosEnum.ACTIVE) {
@@ -31,9 +31,11 @@ public abstract class EnemyBase extends Entidade {
                     inimigo.setState(EstadosEnum.EXPLODING);
                     inimigo.setExplosionStart(currentTime);
                     inimigo.setExplosionEnd(currentTime + 500);
+                    return true;
                 }
             }
         }
+        return false;
     }
 
 
