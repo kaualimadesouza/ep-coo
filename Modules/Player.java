@@ -83,6 +83,7 @@ public class Player extends Entidade{
                 this.setState(EstadosEnum.EXPLODING);
                 this.setExplosionStart(currentTime);
                 this.setExplosionEnd(currentTime + 2000);
+                this.vida--;
             }
         }
     }

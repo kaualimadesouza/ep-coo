@@ -73,6 +73,11 @@ public class Game {
                 }
             }
 
+            if (this.faseAtual.isMorto()) {
+                System.out.println("Voce perdeu");
+                System.exit(1);
+            }
+
             try {
                 Thread.sleep(16);
             } catch (InterruptedException e) {

@@ -1,5 +1,6 @@
 import GameLib.GameLib;
 import Modules.*;
+import jdk.jshell.execution.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,7 @@ public class Phase {
     private Boss boss;
     private boolean isRunningPhase = false;
     private boolean isCompleted = false;
+    private boolean isMorto = false;
     private long delta;
     private long currentTime;
     private Player player;
@@ -230,6 +232,13 @@ public class Phase {
             this.isCompleted = true;
         }
 
+        if(player.getVida() == 0) {
+            this.isMorto = true;
+        }
+
+        Utils.desenhaVida(player.getVida());
+        Utils.desenhaVidaBoss(10.0);
+
         /* chamada a display() da classe GameLib.GameLib atualiza o desenho exibido pela interface do jogo. */
 
         GameLib.display();
@@ -274,5 +283,13 @@ public class Phase {
 
     public void setInimigosDerrotados(int inimigosDerrotados) {
         this.inimigosDerrotados = inimigosDerrotados;
+    }
+
+    public boolean isMorto() {
+        return isMorto;
+    }
+
+    public void setMorto(boolean morto) {
+        isMorto = morto;
     }
 }

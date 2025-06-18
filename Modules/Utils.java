@@ -1,5 +1,8 @@
 package Modules;
 
+import GameLib.GameLib;
+
+import java.awt.*;
 import java.util.List;
 
 public class Utils {
@@ -20,5 +23,33 @@ public class Utils {
         fundoPrimeiroPlano.inicializaFundo();
         fundoSegundoPlano.inicializaFundo();
         for(int i = 0; i < Constantes.MAX_POWERUPS; i++) powerups.add(new PowerUp(EstadosEnum.INACTIVE, 0.0, 0.0, 3.0, 2, System.currentTimeMillis() + 3000));
+    }
+
+    public static void desenhaVida(int vida) {
+        GameLib.setColor(Color.RED);
+
+        int vidas = vida;
+        double raio = 7.0;
+        double espacamento = 2 * raio + 5; // espaço entre bolinhas
+        double posXInicial = 35.0;
+        double posY = 60.0;
+
+        GameLib.setColor(Color.RED);
+
+        for (int i = 0; i < vidas; i++) {
+            double posX = posXInicial + i * espacamento;
+            GameLib.drawCircle(posX, posY, raio);
+        }
+    }
+
+    public static void desenhaVidaBoss(double percentual) {
+        double larguraMaxima = 50;   // largura máxima da barra de vida
+        double altura = 10;           // altura da barra
+        double cx = GameLib.HEIGHT/2;              // centro da barra no eixo X
+        double cy = GameLib.HEIGHT - 30; // posição vertical (próxima da parte inferior)
+
+        GameLib.setColor(Color.WHITE);
+        GameLib.fillRect(cx, cy, larguraMaxima, altura);
+
     }
 }
