@@ -18,23 +18,23 @@ public abstract class EnemyBase extends Entidade {
         this.explosionEnd = explosionEnd;
     }
 
-    public static boolean verificaColisaoComProjetil(Projetil projetil, List<? extends EnemyBase> listaInimigos, long currentTime) {
-        for (EnemyBase inimigo : listaInimigos) {
+    public boolean verificaColisaoComProjetil(Projetil projetil, long currentTime) {
+        if (this.getState() != EstadosEnum.ACTIVE || projetil.getState() != EstadosEnum.ACTIVE) return false;
 
-            if (inimigo.getState() == EstadosEnum.ACTIVE) {
+        double dx = this.getX() - projetil.getX();
+        double dy = this.getY() - projetil.getY();
+        double dist = Math.sqrt(dx * dx + dy * dy);
 
-                double dx = inimigo.getX() - projetil.getX();
-                double dy = inimigo.getY() - projetil.getY();
-                double dist = Math.sqrt(dx * dx + dy * dy);
+        double colisaoDist = this.getRadius() + projetil.getRadius(); // projétil também pode ter raio
 
-                if (dist < inimigo.getRadius()) {
-                    inimigo.setState(EstadosEnum.EXPLODING);
-                    inimigo.setExplosionStart(currentTime);
-                    inimigo.setExplosionEnd(currentTime + 500);
-                    return true;
-                }
-            }
+        if (dist < colisaoDist) {
+            this.setState(EstadosEnum.EXPLODING);
+            projetil.setState(EstadosEnum.INACTIVE);
+            this.setExplosionStart(currentTime);
+            this.setExplosionEnd(currentTime + 500);
+            return true;
         }
+
         return false;
     }
 

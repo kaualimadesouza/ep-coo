@@ -64,7 +64,7 @@ public class Player extends Entidade{
                         projetils.get(free).setVX(0.0);
                         projetils.get(free).setVY(-1.0);
                         projetils.get(free).setState(EstadosEnum.ACTIVE);
-                        this.setNextShot(currentTime + 100);
+                        this.setNextShot(currentTime + 250);
                     }
                 }
             }
