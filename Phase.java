@@ -190,14 +190,18 @@ public class Phase {
                 continue;
             }
 
-            if(EnemyBase.verificaColisaoComProjetil(projetil, this.enemies, this.currentTime)) {
-                this.inimigosDerrotados++;
+
+            for(EnemyBase inimigo : this.enemies) {
+                if(inimigo.verificaColisaoComProjetil(projetil, this.currentTime)) {
+                    this.inimigosDerrotados++;
+                }
             }
 
-            if (EnemyBase.verificaColisaoComProjetil(projetil, this.enemies2, this.currentTime)) {
-                this.inimigosDerrotados++;
+            for(EnemyBase inimigo : this.enemies2) {
+                if(inimigo.verificaColisaoComProjetil(projetil, this.currentTime)) {
+                    this.inimigosDerrotados++;
+                }
             }
-
         }
 
         /* colisões powerups (player) */
@@ -308,7 +312,8 @@ public class Phase {
         }
 
         Utils.desenhaVida(player.getVida());
-        Utils.desenhaVidaBoss(10.0);
+        Utils.desenhaVidaBoss();
+        Utils.desenhaVidaBossAtual(player.getVida());
 
         /* chamada a display() da classe GameLib.GameLib atualiza o desenho exibido pela interface do jogo. */
 
