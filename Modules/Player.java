@@ -122,6 +122,7 @@ public class Player extends Entidade{
         if(this.getState() == EstadosEnum.EXPLODING){
 
             double alpha = (currentTime - this.getExplosionStart()) / (this.getExplosionEnd() - this.getExplosionStart());
+            alpha = Math.max(0.0, Math.min(1.0, alpha));
             GameLib.drawExplosion(this.getX(), this.getY(), alpha);
         }
         else{

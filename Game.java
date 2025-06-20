@@ -2,7 +2,6 @@ import GameLib.GameLib;
 import Modules.*;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,7 +51,6 @@ public class Game {
         this.isRunning = true;
         System.out.println("Vida: " + player.getVida());
         System.out.println("Numero de fases: " + phaseFiles.size());
-        System.out.println(phaseFiles);
 
         startNextPhase();
 
@@ -70,6 +68,7 @@ public class Game {
                 else {
                     System.out.println("Começando outra fase");
                     startNextPhase();
+                    System.out.println();
                 }
             }
 
@@ -93,8 +92,8 @@ public class Game {
             System.out.println("Parabéns, você venceu o jogo!");
             this.isRunning = false;
         } else {
-            faseAtual = new Phase();
             String nextPhaseFile = phaseFiles.get(currentPhaseIndex);
+            faseAtual = new Phase(nextPhaseFile);
             System.out.println("Iniciando fase " + (currentPhaseIndex + 1) + " a partir de '" + nextPhaseFile + "'...");
         }
     }

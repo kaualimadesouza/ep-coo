@@ -22,5 +22,4 @@ public class Main {
 		game.run();
 		System.out.println("-- Finalizando Jogo --");
 	}
-
 }

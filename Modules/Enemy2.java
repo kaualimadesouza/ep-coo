@@ -141,37 +141,6 @@ public class Enemy2 extends EnemyBase{
         }
     }
 
-    public static void verificaSeNovosEnemy2DevemSerLancados(long currentTime, List<Enemy2> enemies2) {
-        if(currentTime > Enemy2.getNextEnemy2()){
-
-            int free = Utils.findFreeIndex(enemies2);
-
-            if(free < enemies2.size()){
-
-                enemies2.get(free).setX(Enemy2.getEnemy2_spawnX());
-                enemies2.get(free).setY(-10.0);
-                enemies2.get(free).setV(0.42);
-                enemies2.get(free).setAngle((3 * Math.PI) / 2);
-                enemies2.get(free).setRV(0.0);
-                enemies2.get(free).setState(EstadosEnum.ACTIVE);
-
-                Enemy2.setEnemy2_count(Enemy2.getEnemy2_count() + 1);
-
-                if(Enemy2.getEnemy2_count() < 10){
-
-                    Enemy2.setNextEnemy2(currentTime + 120);
-                }
-                else {
-
-                    Enemy2.setEnemy2_count(0);
-                    Enemy2.setEnemy2_spawnX((long) (Math.random() > 0.5 ? GameLib.WIDTH * 0.2 : GameLib.WIDTH * 0.8));
-                    Enemy2.setNextEnemy2((long) (currentTime + 3000 + Math.random() * 3000));
-                }
-            }
-        }
-    }
-
-
     public static long getEnemy2_spawnX() {
         return enemy2_spawnX;
     }

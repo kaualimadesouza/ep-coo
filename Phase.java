@@ -1,7 +1,10 @@
 import GameLib.GameLib;
 import Modules.*;
-import jdk.jshell.execution.Util;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +17,7 @@ public class Phase {
     private boolean isMorto = false;
     private long delta;
     private long currentTime;
+    private long startTime;
     private Player player;
     private List<Projetil> projetils;
     private List<Enemy1> enemies;
@@ -23,8 +27,9 @@ public class Phase {
     private Fundo fundoSegundoPlano;
     private List<PowerUp> powerUps;
     private int inimigosDerrotados;
+    private List<EnemyConfig> enemyConfig;
 
-    public Phase() {
+    public Phase(String phaseConfig) {
         this.inimigosDerrotados = 0;
         this.inimigosTipo1 = inimigosTipo1;
         this.inimigosTipo2 = inimigosTipo2;
@@ -32,7 +37,8 @@ public class Phase {
         this.isRunningPhase = isRunningPhase;
         this.isCompleted = false;
 
-        this.currentTime = System.currentTimeMillis();
+        this.startTime = System.currentTimeMillis();
+        this.currentTime = this.startTime;
 
         /* variáveis do player */
 
@@ -54,6 +60,7 @@ public class Phase {
         /* variáveis dos inimigos tipo 1 */
 
         this.enemies = new ArrayList<>();
+        enemyConfig = new ArrayList<>();
 
         /* variáveis dos inimigos tipo 2 */
 
@@ -80,14 +87,82 @@ public class Phase {
         Utils.inicializacoes(fundoPrimeiroPlano, fundoSegundoPlano, projetils, e_projetils, enemies, enemies2, currentTime, powerUps);
 
         /* iniciado interface gráfica */
+
+        loadPhaseConfiguration(phaseConfig);
+    }
+
+    public void verificaLancamentos(long currentTime) {
+        for (EnemyConfig config : this.enemyConfig) {
+
+            if (currentTime >= config.getQuando() && !config.isLancado()) {
+                config.setLancado(true);
+                switch (config.getTipo()) {
+                    case 1: {
+                        int free = Utils.findFreeIndex(this.enemies);
+                        if (free < this.enemies.size()) {
+                            Enemy1 enemy = this.enemies.get(free);
+                            enemy.setX(config.getPosX());
+                            enemy.setY(config.getPosY()); // Usa a posição do arquivo
+                            enemy.setV(0.20 + Math.random() * 0.15);
+                            enemy.setAngle((3 * Math.PI) / 2);
+                            enemy.setRV(0.0);
+                            enemy.setState(EstadosEnum.ACTIVE);
+                            enemy.setNextShoot(currentTime + 500);
+                        }
+                        break;
+                    }
+                    case 2: { // Lançar Inimigo do TIPO 2
+                        int free = Utils.findFreeIndex(this.enemies2);
+                        if (free < this.enemies2.size()) {
+                            Enemy2 enemy = this.enemies2.get(free);
+                            enemy.setX(Enemy2.getEnemy2_spawnX());
+                            enemy.setY(-10.0);
+                            enemy.setV(0.42);
+                            enemy.setAngle((3 * Math.PI) / 2);
+                            enemy.setRV(0.0);
+                            enemy.setState(EstadosEnum.ACTIVE);
+                            Enemy2.setEnemy2_count(Enemy2.getEnemy2_count() + 1);
+                        }
+                        break; // Importante sair do switch
+                    }
+                }
+            }
+        }
+    }
+
+    private void loadPhaseConfiguration(String configFile) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
+            String linha;
+
+            while ((linha = reader.readLine()) != null) {
+
+                if (linha.trim().startsWith("#") || linha.trim().isEmpty()) {
+                    continue;
+                }
+                String[] palavras = linha.split("\\s+");
+
+                if (palavras.length == 5 && palavras[0].equalsIgnoreCase("INIMIGO")) {
+                    int tipo = Integer.parseInt(palavras[1]);
+                    long quando = this.startTime + Long.parseLong(palavras[2]);
+                    double posX = Double.parseDouble(palavras[3]);
+                    double posY = Double.parseDouble(palavras[4]);
+
+                    EnemyConfig novoInimigo = new EnemyConfig(tipo, quando, posX, posY);
+
+                    this.enemyConfig.add(novoInimigo);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void updatePhase() {
         /* Usada para atualizar o estado dos elementos do jogo    */
         /* (player, projéteis e inimigos) "delta" indica quantos  */
         /* ms se passaram desde a última atualização.             */
-
-        System.out.println("Inimigos Derrotados: " + getInimigosDerrotados());
 
         this.delta = System.currentTimeMillis() - this.currentTime;
 
@@ -154,11 +229,7 @@ public class Phase {
 
         /* verificando se novos inimigos (tipo 1) devem ser "lançados" */
 
-        Enemy1.verificaSeNovosEnemy1DevemSerLancados(this.currentTime, this.enemies);
-
-        /* verificando se novos inimigos (tipo 2) devem ser "lançados" */
-
-        Enemy2.verificaSeNovosEnemy2DevemSerLancados(this.currentTime, this.enemies2);
+        this.verificaLancamentos(this.currentTime);
 
         //
 

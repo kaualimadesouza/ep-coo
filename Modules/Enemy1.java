@@ -94,25 +94,6 @@ public class Enemy1 extends EnemyBase {
         }
     }
 
-    public static void verificaSeNovosEnemy1DevemSerLancados(long currentTime, List<Enemy1> enemies) {
-        if (currentTime > Enemy1.getNextEnemy1()) {
-
-            int free = Utils.findFreeIndex(enemies);
-
-            if (free < enemies.size()) {
-
-                enemies.get(free).setX(Math.random() * (GameLib.WIDTH - 20.0) + 10.0);
-                enemies.get(free).setY(-10.0);
-                enemies.get(free).setV(0.20 + Math.random() * 0.15);
-                enemies.get(free).setAngle((3 * Math.PI) / 2);
-                enemies.get(free).setRV(0.0);
-                enemies.get(free).setState(EstadosEnum.ACTIVE);
-                enemies.get(free).setNextShoot(currentTime + 500);
-                Enemy1.setNextEnemy1(currentTime + 500);
-            }
-        }
-    }
-
     public static long getNextEnemy1() {
         return nextEnemy1;
     }
