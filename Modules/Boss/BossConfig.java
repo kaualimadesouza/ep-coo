@@ -1,4 +1,4 @@
-package Modules;
+package Modules.Boss;
 
 public class BossConfig {
     private int tipo;

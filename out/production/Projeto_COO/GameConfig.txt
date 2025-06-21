@@ -1,4 +1,0 @@
-3
-2
-fase1.txt
-fase2.txt

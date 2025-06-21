@@ -1,4 +1,4 @@
-package Modules;
+package Modules.Enemy;
 
 public class EnemyConfig {
     public int tipo;
