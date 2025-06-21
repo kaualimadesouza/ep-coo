@@ -10,6 +10,7 @@ public class Player extends Entidade{
     private double explosionStart;
     private double explosionEnd;
     private long nextShot;
+    private long invulneravelAte;
 
     public Player(EstadosEnum state, double x, double y, double VX, double VY,
                   double radius, double explosionStart, double explosionEnd, long nextShot, int vida) {
@@ -72,18 +73,25 @@ public class Player extends Entidade{
     }
 
     public <T extends Entidade> void MortePlayer(List<T> entidade, long currentTime) {
+        if(currentTime < this.getInvulneravelAte()) return;
+
         for (T t : entidade) {
+            if (t.getY() < 0 || t.getY() > GameLib.HEIGHT) continue;
 
             double dx = t.getX() - this.getX();
             double dy = t.getY() - this.getY();
             double dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist < (this.getRadius() + t.getRadius()) * 0.8) {
-                resetPlayerStats();
-                this.setState(EstadosEnum.EXPLODING);
-                this.setExplosionStart(currentTime);
-                this.setExplosionEnd(currentTime + 2000);
-                this.vida--;
+                if(this.vida > 0 && this.getState() == EstadosEnum.ACTIVE) {
+                    resetPlayerStats();
+                    this.setState(EstadosEnum.EXPLODING);
+                    this.setExplosionStart(currentTime);
+                    this.setExplosionEnd(currentTime + 2000);
+                    this.vida--;
+                    this.invulneravelAte = currentTime + 3000;
+                }
+
             }
         }
     }
@@ -127,9 +135,21 @@ public class Player extends Entidade{
         }
         else{
 
+            if (currentTime < invulneravelAte && (currentTime / 200) % 2 == 0) {
+                return;
+            }
+
             GameLib.setColor(Color.RED);
             GameLib.drawPlayer(this.getX(), this.getY(), this.getRadius());
         }
+    }
+
+    public long getInvulneravelAte() {
+        return invulneravelAte;
+    }
+
+    public void setInvulneravelAte(long invulneravelAte) {
+        this.invulneravelAte = invulneravelAte;
     }
 
     public double getExplosionStart() {

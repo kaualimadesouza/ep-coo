@@ -60,7 +60,7 @@ public class Game {
             }
 
             // 2 Chefes derrotados
-            if (this.faseAtual != null && this.faseAtual.isCompleted()) {
+            if ((this.faseAtual != null && this.faseAtual.isCompleted())) {
                 if(this.currentPhaseIndex == this.phaseFiles.size()) {
                     System.out.println("Voce venceu");
                     return;

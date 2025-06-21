@@ -53,12 +53,14 @@ public class Utils {
     }
 
     public static void desenhaVidaBossAtual(int vidaAtualBoss) {
-        double larguraMaxima = vidaAtualBoss * 100;
+        int vidaMaxima = 30;
+        double larguraTotal = 300; // mesma largura da barra de fundo
+        double larguraAtual = (vidaAtualBoss / (double) vidaMaxima) * larguraTotal;
         double altura = 10;
-        double cx = GameLib.WIDTH/2;
-        double cy = GameLib.HEIGHT - 30;
+        double cx = GameLib.WIDTH / 2;
+        double cy = GameLib.HEIGHT - 30; // mesma altura da barra de fundo
 
         GameLib.setColor(Color.RED);
-        GameLib.fillRect(cx, cy, larguraMaxima, altura);
+        GameLib.fillRect(cx, cy, larguraAtual, altura);
     }
 }

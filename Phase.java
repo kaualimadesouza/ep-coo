@@ -12,6 +12,7 @@ public class Phase {
     private List<Enemy1> inimigosTipo1;
     private List<Enemy2> inimigosTipo2;
     private Boss boss;
+    private BossConfig bossConfig;
     private boolean isRunningPhase = false;
     private boolean isCompleted = false;
     private boolean isMorto = false;
@@ -91,7 +92,25 @@ public class Phase {
         loadPhaseConfiguration(phaseConfig);
     }
 
-    public void verificaLancamentos(long currentTime) {
+    public void verificaLancamentosBoss(long currentTime) {
+        if (this.bossConfig == null) return;
+
+        if(currentTime >= bossConfig.getQuando() && !bossConfig.isLancado()) {
+            bossConfig.setLancado(true);
+
+            switch (bossConfig.getTipo()) {
+                case 1:
+                    this.boss = Boss.criaBossInicial(currentTime, bossConfig.getPosX(), bossConfig.getPosY(), bossConfig.getPontosVida());
+                    this.boss.setLancado(true);
+                    break;
+                case 2:
+                    break;
+            }
+
+        }
+    }
+
+    public void verificaLancamentosInimigos(long currentTime) {
         for (EnemyConfig config : this.enemyConfig) {
 
             if (currentTime >= config.getQuando() && !config.isLancado()) {
@@ -151,6 +170,17 @@ public class Phase {
 
                     this.enemyConfig.add(novoInimigo);
                 }
+                else if (palavras.length == 6 && palavras[0].equalsIgnoreCase("CHEFE")) {
+                    int tipo = Integer.parseInt(palavras[1]);
+                    int pontosVida = Integer.parseInt(palavras[2]);
+                    long quando = this.startTime + Long.parseLong(palavras[3]);
+                    double posX = Double.parseDouble(palavras[4]);
+                    double posY = Double.parseDouble(palavras[5]);
+
+                    this.bossConfig = new BossConfig(tipo, pontosVida, quando, posX, posY);
+
+
+                }
             }
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
@@ -202,6 +232,10 @@ public class Phase {
                     this.inimigosDerrotados++;
                 }
             }
+
+            if(this.boss != null && this.boss.getState() == EstadosEnum.ACTIVE) {
+                this.boss.verificaColisaoComProjetil(projetil, currentTime);
+            }
         }
 
         /* colisões powerups (player) */
@@ -231,9 +265,18 @@ public class Phase {
 
         for(Enemy2 enemy2 : this.enemies2) enemy2.comportamento(this.currentTime, this.delta, player, this.e_projetils);
 
+        /* Boss */
+        if(this.boss != null)  {
+            this.boss.comportamento(currentTime, e_projetils);
+        }
+
+
         /* verificando se novos inimigos (tipo 1) devem ser "lançados" */
 
-        this.verificaLancamentos(this.currentTime);
+        this.verificaLancamentosInimigos(this.currentTime);
+
+        // Verifica se o boss deve ser lançado
+        this.verificaLancamentosBoss(this.currentTime);
 
         //
 
@@ -303,17 +346,24 @@ public class Phase {
             powerUp.desenhaPowerUp();
         }
 
-        if(getInimigosDerrotados() == 10) {
-            this.isCompleted = true;
-        }
-
         if(player.getVida() == 0) {
             this.isMorto = true;
         }
 
         Utils.desenhaVida(player.getVida());
-        Utils.desenhaVidaBoss();
-        Utils.desenhaVidaBossAtual(player.getVida());
+
+        if (this.boss != null) {
+            if (this.boss.getState() == EstadosEnum.ACTIVE) {
+                Utils.desenhaVidaBoss();
+                Utils.desenhaVidaBossAtual(this.boss.getVida());
+                this.boss.desenhaInimigo(this.currentTime);
+            }
+
+            if (this.boss.estaDerrotado() && !this.isCompleted) {
+                this.isCompleted = true;
+                System.out.println("Fase vencida!");
+            }
+        }
 
         /* chamada a display() da classe GameLib.GameLib atualiza o desenho exibido pela interface do jogo. */
 
