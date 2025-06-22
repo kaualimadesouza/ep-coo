@@ -68,8 +68,9 @@ public class Utils {
         int vidas = vida;
         double raio = 7.0;
         double espacamento = 2 * raio + 5;
-        double posXInicial = 35.0;
-        double posY = 60.0;
+        double larguraTotal = (vidas - 1) * espacamento;
+        double posXInicial = GameLib.WIDTH / 2 - larguraTotal / 2;
+        double posY = 75.0;
 
         GameLib.setColor(Color.RED);
 

@@ -26,12 +26,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Phase {
-    private List<Enemy1> inimigosTipo1;
-    private List<Enemy2> inimigosTipo2;
     private BossInterface boss;
     private BossConfig bossConfig;
     private List<PowerupConfig> poweupConfig;
-    private boolean isRunningPhase = false;
     private boolean isCompleted = false;
     private boolean isMorto = false;
     private long delta;
@@ -49,14 +46,15 @@ public class Phase {
     private int inimigosDerrotados;
     private List<EnemyConfig> enemyConfig;
 
-    public Phase(String phaseConfig) {
+    // Inicializações
+    public Phase(String phaseConfig, int vidaPlayer) {
         this.inimigosDerrotados = 0;
         this.isCompleted = false;
 
         this.startTime = System.currentTimeMillis();
         this.currentTime = this.startTime;
 
-        /* variáveis do player */
+        /* player */
 
         this.player = new Player(EstadosEnum.ACTIVE,
                 (double) GameLib.WIDTH / 2,
@@ -67,7 +65,7 @@ public class Phase {
                 0,
                 0,
                 currentTime,
-                10);
+                vidaPlayer);
 
         /* variáveis dos projéteis disparados pelo player */
 
@@ -77,8 +75,6 @@ public class Phase {
 
         this.enemies = new ArrayList<>();
         enemyConfig = new ArrayList<>();
-
-        this.poweupConfig = new ArrayList<>();
 
         /* variáveis dos inimigos tipo 2 */
 
@@ -100,6 +96,7 @@ public class Phase {
 
         this.powerUps = new ArrayList<>();
         this.powerUps2 = new ArrayList<>();
+        this.poweupConfig = new ArrayList<>();
 
         /* inicializações */
 
@@ -113,7 +110,7 @@ public class Phase {
     public void verificaLancamentosBoss(long currentTime) {
         if (this.bossConfig == null) return;
 
-        if(currentTime >= bossConfig.getQuando() && !bossConfig.isLancado()) {
+        if (currentTime >= bossConfig.getQuando() && !bossConfig.isLancado()) {
             bossConfig.setLancado(true);
 
             switch (bossConfig.getTipo()) {
@@ -140,7 +137,7 @@ public class Phase {
                         if (free < this.enemies.size()) {
                             Enemy1 enemy = this.enemies.get(free);
                             enemy.setX(config.getPosX());
-                            enemy.setY(config.getPosY()); // Usa a posição do arquivo
+                            enemy.setY(config.getPosY());
                             enemy.setV(0.20 + Math.random() * 0.15);
                             enemy.setAngle((3 * Math.PI) / 2);
                             enemy.setRV(0.0);
@@ -170,6 +167,7 @@ public class Phase {
 
     public void verificaSeNovosPowerUpsDevemSerLancados(long currentTime, List<PowerUp1> powerups, List<PowerUp2> powerups2) {
         for (PowerupConfig powerupConfig : this.poweupConfig) {
+            // Verifica se o poweruo já nao foi lançado e se chegou o seu momento do jogo de ser lançado
             if (currentTime >= powerupConfig.getQuando() && !powerupConfig.isLancado()) {
                 powerupConfig.setLancado(true);
 
@@ -189,9 +187,10 @@ public class Phase {
                         free = Utils.findFreeIndex(powerups2);
 
                         if (free < powerups2.size()) {
-                            PowerUp2 powerup = powerups2.get(free); // Pega o objeto reutilizado
+                            PowerUp2 powerup = powerups2.get(free);
 
-                            powerup.setEfeitoAplicado(false); // Reseta a "memória" do power-up
+                            // Reseta o efeito do power-up
+                            powerup.setEfeitoAplicado(false);
 
                             powerup.setX(powerupConfig.getPosX());
                             powerup.setY(powerupConfig.getPosY());
@@ -199,13 +198,12 @@ public class Phase {
                         }
                         break;
                 }
-
             }
         }
     }
 
     private void loadPhaseConfiguration(String configFile) {
-    try (BufferedReader reader = new BufferedReader(new FileReader("TextPhases/" + configFile))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("TextPhases/" + configFile))) {
             String linha;
 
             while ((linha = reader.readLine()) != null) {
@@ -224,8 +222,7 @@ public class Phase {
                     EnemyConfig novoInimigo = new EnemyConfig(tipo, quando, posX, posY);
 
                     this.enemyConfig.add(novoInimigo);
-                }
-                else if (palavras.length == 6 && palavras[0].equalsIgnoreCase("CHEFE")) {
+                } else if (palavras.length == 6 && palavras[0].equalsIgnoreCase("CHEFE")) {
                     int tipo = Integer.parseInt(palavras[1]);
                     int pontosVida = Integer.parseInt(palavras[2]);
                     long quando = this.startTime + Long.parseLong(palavras[3]);
@@ -233,8 +230,7 @@ public class Phase {
                     double posY = Double.parseDouble(palavras[5]);
 
                     this.bossConfig = new BossConfig(tipo, pontosVida, quando, posX, posY);
-                }
-                else if (palavras.length == 5 && palavras[0].equalsIgnoreCase("POWERUP")) {
+                } else if (palavras.length == 5 && palavras[0].equalsIgnoreCase("POWERUP")) {
                     int tipo = Integer.parseInt(palavras[1]);
                     long quando = this.startTime + Long.parseLong(palavras[2]);
                     double posX = Double.parseDouble(palavras[3]);
@@ -251,113 +247,38 @@ public class Phase {
     }
 
     public void updatePhase() {
-        /* Usada para atualizar o estado dos elementos do jogo    */
-        /* (player, projéteis e inimigos) "delta" indica quantos  */
-        /* ms se passaram desde a última atualização.             */
-
         this.delta = System.currentTimeMillis() - this.currentTime;
-
-        /* Já a variável "currentTime" nos dá o timestamp atual.  */
-
         this.currentTime = System.currentTimeMillis();
 
-        /* Verificação de colisões */
+        this.verificarColisoes();
+        this.atualizarEntidades();
+        this.lancamentoInimigos();
 
-        if(player.getState() == EstadosEnum.ACTIVE){
+        /* Verificando entrada do usuário (teclado) */
 
-            /* colisões player - projeteis (inimigo) */
+        processInput(player, this.projetils, this.currentTime, this.delta);
 
-            player.MortePlayer(this.e_projetils, this.currentTime);
-            player.MortePlayer(this.enemies, this.currentTime);
-            player.MortePlayer(this.enemies2, this.currentTime);
-            player.colisaoPowerUp(this.powerUps, this.currentTime);
-            player.colisaoPowerUp(this.powerUps2, this.currentTime);
+        this.rederizacaoFase();
 
-        }
+        busyWait(currentTime + 3);
+    }
 
-        player.atualizarPowerUp2(currentTime);
-        player.atualizarPowerUps(powerUps, currentTime);
-        player.verificaEntradaUsuario(projetils, currentTime, delta);
-        player.verificaCoordenadasDentroJogo();
-        player.desenhaPlayer(currentTime);
-
-        /* colisões projeteis (player) - inimigos */
-
-        for (Projetil projetil : this.projetils) {
-
-            if (projetil.getState() != EstadosEnum.ACTIVE) {
-                continue;
-            }
-
-
-            for(EnemyBase inimigo : this.enemies) {
-                if(inimigo.verificaColisaoComProjetil(projetil, this.currentTime)) {
-                    this.inimigosDerrotados++;
-                }
-            }
-
-            for(EnemyBase inimigo : this.enemies2) {
-                if(inimigo.verificaColisaoComProjetil(projetil, this.currentTime)) {
-                    this.inimigosDerrotados++;
-                }
-            }
-
-            if(this.boss != null && this.boss.getState() == EstadosEnum.ACTIVE) {
-                this.boss.verificaColisaoComProjetil(projetil, currentTime);
-            }
-        }
-
-        /* colisões powerups (player) */
-
-
-        /* Atualizações de estados */
-
-
-        /* projeteis (player) */
-
-        for(Projetil projetil : this.projetils) {
-            projetil.atualizaEstadoProjetilPlayer(this.delta);
-        }
-
-        /* projeteis (inimigos) */
-
-        for (Projetil projetil : this.e_projetils) {
-            projetil.atualizaEstadoProjetilInimigo(this.delta);
-        }
-
-        /* inimigos tipo 1 */
-
-
-        for(Enemy1 enemy1 : this.enemies) enemy1.comportamento(this.currentTime, this.delta, player, this.e_projetils);
-
-        /* inimigos tipo 2 */
-
-        for(Enemy2 enemy2 : this.enemies2) enemy2.comportamento(this.currentTime, this.delta, player, this.e_projetils);
-
-        /* Boss */
-        if(this.boss != null)  {
-            this.boss.update(currentTime, e_projetils);
-        }
-
-
-        /* verificando se novos inimigos (tipo 1) devem ser "lançados" */
+    private void lancamentoInimigos() {
+        /* verificando se novos inimigos (tipo 1 ou 2) devem ser lançados */
 
         this.verificaLancamentosInimigos(this.currentTime);
 
         // Verifica se o boss deve ser lançado
+
         this.verificaLancamentosBoss(this.currentTime);
-
         this.verificaSeNovosPowerUpsDevemSerLancados(this.currentTime, this.powerUps, this.powerUps2);
+    }
 
-        //
-
-        for (PowerUp1 powerUp : this.powerUps) {
-            powerUp.atualizaEstadoPowerUp(this.delta);
-        }
-
-        for (PowerUp2 powerUp : this.powerUps2) {
-            powerUp.atualizaEstadoPowerUp(this.delta);
-        }
+    private void atualizarEntidades() {
+        player.atualizarPowerUp2(currentTime);
+        player.atualizarPowerUps(powerUps, currentTime);
+        player.verificaEntradaUsuario(projetils, currentTime, delta);
+        player.verificaCoordenadasDentroJogo();
 
         player.atualizarPowerUps(this.powerUps, this.currentTime);
 
@@ -367,13 +288,82 @@ public class Phase {
         player.verificaSeExplosaoAcabou(this.currentTime);
 
 
-        /* Verificando entrada do usuário (teclado) */
+        /* projeteis (player) */
 
-        processInput(player, this.projetils, this.currentTime, this.delta);
+        for (Projetil projetil : this.projetils) {
+            projetil.atualizaEstadoProjetilPlayer(this.delta);
+        }
 
-        /* Verificando se coordenadas do player ainda estão dentro */
-        /* da tela de jogo após processar entrada do usuário.      */
+        /* update projeteis (inimigos) */
 
+        for (Projetil projetil : this.e_projetils) {
+            projetil.atualizaEstadoProjetilInimigo(this.delta);
+        }
+
+        /* update inimigos tipo 1 */
+
+        for (Enemy1 enemy1 : this.enemies) enemy1.comportamento(this.currentTime, this.delta, player, this.e_projetils);
+
+        /* update inimigos tipo 2 */
+
+        for (Enemy2 enemy2 : this.enemies2)
+            enemy2.comportamento(this.currentTime, this.delta, player, this.e_projetils);
+
+        /* update Boss */
+        if (this.boss != null) {
+            this.boss.update(currentTime, e_projetils);
+        }
+
+        // Update powerups
+
+        for (PowerUp1 powerUp : this.powerUps) {
+            powerUp.atualizaEstadoPowerUp(this.delta);
+        }
+
+        for (PowerUp2 powerUp : this.powerUps2) {
+            powerUp.atualizaEstadoPowerUp(this.delta);
+        }
+    }
+
+    public void verificarColisoes() {
+        /* Verificação de colisões */
+
+        // Colisões Player
+
+        if (player.getState() == EstadosEnum.ACTIVE) {
+            player.MortePlayer(this.e_projetils, this.currentTime);
+            player.MortePlayer(this.enemies, this.currentTime);
+            player.MortePlayer(this.enemies2, this.currentTime);
+            player.colisaoPowerUp(this.powerUps, this.currentTime);
+            player.colisaoPowerUp(this.powerUps2, this.currentTime);
+        }
+
+        /* update colisões projeteis (player) - inimigos */
+
+        for (Projetil projetil : this.projetils) {
+            if (projetil.getState() != EstadosEnum.ACTIVE) {
+                continue;
+            }
+
+            for (EnemyBase inimigo : this.enemies) {
+                if (inimigo.verificaColisaoComProjetil(projetil, this.currentTime)) {
+                    this.inimigosDerrotados++;
+                }
+            }
+
+            for (EnemyBase inimigo : this.enemies2) {
+                if (inimigo.verificaColisaoComProjetil(projetil, this.currentTime)) {
+                    this.inimigosDerrotados++;
+                }
+            }
+
+            if (this.boss != null && this.boss.getState() == EstadosEnum.ACTIVE) {
+                this.boss.verificaColisaoComProjetil(projetil, currentTime);
+            }
+        }
+    }
+
+    public void rederizacaoFase() {
         /* Desenho da cena */
 
         /* desenhando plano fundo distante */
@@ -384,39 +374,37 @@ public class Phase {
 
         this.fundoPrimeiroPlano.desenhaPlanoFundoProximo(this.delta);
 
-
         /* desenhando player */
 
         player.desenhaPlayer(this.currentTime);
 
-
         /* deenhando projeteis (player) */
 
-        for(Projetil projetil : this.projetils) {
+        for (Projetil projetil : this.projetils) {
             projetil.desenhaProjetilPlayer();
         }
 
         /* desenhando projeteis (inimigos) */
 
-        for(Projetil e_projetil : this.e_projetils) {
+        for (Projetil e_projetil : this.e_projetils) {
             e_projetil.desenhaProjetilInimigo();
         }
 
-
         /* desenhando inimigos (tipo 1) */
 
-        for(Enemy1 enemy1 : this.enemies) {
+        for (Enemy1 enemy1 : this.enemies) {
             enemy1.desenhaInimigo(this.currentTime);
         }
 
         /* desenhando inimigos (tipo 2) */
 
-        for(Enemy2 enemy2 : this.enemies2) {
+        for (Enemy2 enemy2 : this.enemies2) {
             enemy2.desenhaInimigo(this.currentTime);
         }
 
         /* desenhando inimigos (tipo 2) */
-        for(PowerUp1 powerUp : this.powerUps) {
+
+        for (PowerUp1 powerUp : this.powerUps) {
             powerUp.desenhaPowerUp();
         }
 
@@ -426,10 +414,13 @@ public class Phase {
 
         Utils.desenhaVidaPlayer(player.getVida());
 
-        if(player.getVida() == 0) {
+        // Se o player é atingido ele perde uma vida e essa verificação abaixo ve se as vidas acabaram
+
+        if (player.getVida() == 0) {
             this.isMorto = true;
         }
 
+        // Desenha o boss e a vida dele
 
         if (this.boss != null) {
             if (this.boss.getState() == EstadosEnum.ACTIVE) {
@@ -443,17 +434,12 @@ public class Phase {
             }
         }
 
-        /* chamada a display() da classe GameLib.GameLib atualiza o desenho exibido pela interface do jogo. */
-
         GameLib.display();
 
-        /* faz uma pausa de modo que cada execução do laço do main loop demore aproximadamente 3 ms. */
-
-        busyWait(currentTime + 3);
     }
 
-    public static void busyWait(long time){
-        while(System.currentTimeMillis() < time) Thread.yield();
+    public static void busyWait(long time) {
+        while (System.currentTimeMillis() < time) Thread.yield();
     }
 
     static void processInput(Player player, List<Projetil> projetils, long currentTime, long delta) {
@@ -461,35 +447,11 @@ public class Phase {
         player.verificaCoordenadasDentroJogo();
     }
 
-    public List<Enemy1> getInimigosTipo1() {
-        return inimigosTipo1;
-    }
-
-    public List<Enemy2> getInimigosTipo2() {
-        return inimigosTipo2;
-    }
-
-    public boolean isRunningPhase() {
-        return isRunningPhase;
-    }
-
     public boolean isCompleted() {
         return isCompleted;
     }
 
-    public int getInimigosDerrotados() {
-        return inimigosDerrotados;
-    }
-
-    public void setInimigosDerrotados(int inimigosDerrotados) {
-        this.inimigosDerrotados = inimigosDerrotados;
-    }
-
     public boolean isMorto() {
         return isMorto;
-    }
-
-    public void setMorto(boolean morto) {
-        isMorto = morto;
     }
 }

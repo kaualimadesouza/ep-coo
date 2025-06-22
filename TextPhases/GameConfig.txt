@@ -1,4 +1,4 @@
-3
+7
 2
 fase1.txt
 fase2.txt

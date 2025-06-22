@@ -17,6 +17,7 @@ public class Game {
     private boolean isRunning = false;
     private int currentPhaseIndex = -1;
     private Phase faseAtual;
+    private int playerHealth;
 
     public Game() {
         loadGameConfiguration("TextPhases/GameConfig.txt");
@@ -26,17 +27,7 @@ public class Game {
     private void loadGameConfiguration(String configFile) {
         try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
             // Lê os pontos de vida do jogador
-            int playerHealth = Integer.parseInt(reader.readLine());
-            this.player = new Player(EstadosEnum.ACTIVE,
-                    (double) GameLib.WIDTH / 2,
-                    GameLib.HEIGHT * 0.90,
-                    Constantes.V_INICIAL,
-                    Constantes.V_INICIAL,
-                    12.0,
-                    0,
-                    0,
-                    System.currentTimeMillis(),
-                    3);;
+            this.playerHealth = Integer.parseInt(reader.readLine());
 
             // Lê o número de fases para saber quantos arquivos ler
             int numberOfPhases = Integer.parseInt(reader.readLine());
@@ -53,7 +44,6 @@ public class Game {
 
     public void run() throws IOException {
         this.isRunning = true;
-        System.out.println("Vida: " + player.getVida());
         System.out.println("Numero de fases: " + phaseFiles.size());
 
         startNextPhase();
@@ -97,7 +87,7 @@ public class Game {
             this.isRunning = false;
         } else {
             String nextPhaseFile = phaseFiles.get(currentPhaseIndex);
-            faseAtual = new Phase(nextPhaseFile);
+            faseAtual = new Phase(nextPhaseFile, this.playerHealth);
             System.out.println("Iniciando fase " + (currentPhaseIndex + 1) + " a partir de '" + nextPhaseFile + "'...");
         }
     }
