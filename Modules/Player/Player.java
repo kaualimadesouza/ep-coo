@@ -45,7 +45,7 @@ public class Player extends Entidade {
         if (this.getY() >= GameLib.HEIGHT) this.setY(GameLib.HEIGHT - 1);
     }
 
-    public void resetPlayerStats() {
+    public void resetSpeed() {
         this.setVX(Constantes.V_INICIAL);
         this.setVY(Constantes.V_INICIAL);
     }
@@ -125,7 +125,7 @@ public class Player extends Entidade {
 
             if (dist < (this.getRadius() + t.getRadius()) * 0.8) {
                 if (this.vida > 0 && this.getState() == EstadosEnum.ACTIVE) {
-                    resetPlayerStats();
+                    resetSpeed();
                     this.setState(EstadosEnum.EXPLODING);
                     this.setExplosionStart(currentTime);
                     this.setExplosionEnd(currentTime + 2000);
@@ -157,32 +157,20 @@ public class Player extends Entidade {
 
     public void colisaoPowerUp2(List<PowerUp2> powerUps2, long currentTime) {
         for (PowerUp2 powerup : powerUps2) {
-            if (powerup.getState() == EstadosEnum.ACTIVE) {
-                double dx = powerup.getX() - this.getX();
-                double dy = powerup.getY() - this.getY();
-                double dist = Math.sqrt(dx * dx + dy * dy);
+            double dx = powerup.getX() - this.getX();
+            double dy = powerup.getY() - this.getY();
+            double dist = Math.sqrt(dx * dx + dy * dy);
 
-                if (dist < (this.getRadius() + powerup.getRadius()) * 0.8) {
-                    if (!powerup.isEfeitoAplicado()) {
-                        // Aplica o efeito
-                        this.setVX(this.getVX() * powerup.getAumentarStatus());
-                        this.setVY(this.getVY() * powerup.getAumentarStatus());
-                        powerup.setExpiracao(currentTime + 30000); // 30 segundos de efeito
-                        powerup.setEfeitoAplicado(true);
-                    }
-                    // NÃO coloque powerup.setState(EstadosEnum.INACTIVE) aqui!
+            if (dist < (this.getRadius() + powerup.getRadius()) * 1.2) {
+                if (!powerup.isEfeitoAplicado()) {
+                    this.powerUp2Level++;
+                    this.powerUp2Expiracao = currentTime + 30000;
+                    powerup.setEfeitoAplicado(true);
                 }
-
-                // Remove o powerup da tela só quando o efeito acabar
-                if (powerup.isEfeitoAplicado() && currentTime > powerup.getExpiracao()) {
-                    // Volta a velocidade ao normal, se necessário
-                    this.setVX(this.getVX() / powerup.getAumentarStatus());
-                    this.setVY(this.getVY() / powerup.getAumentarStatus());
-                    powerup.setState(EstadosEnum.INACTIVE);
-                    powerup.setEfeitoAplicado(false);
-                }
+                powerup.setState(EstadosEnum.INACTIVE);
             }
         }
+
     }
 
     public void atualizarPowerUp2(long currentTime) {
@@ -213,31 +201,42 @@ public class Player extends Entidade {
             // Piscar durante invulnerabilidade
             if (currentTime < invulneravelAte && (currentTime / 200) % 2 == 0) return;
 
-            if (comBoostVelocidade) {
-                // Trilhas azuis para indicar boost de velocidade
-                GameLib.setColor(Color.CYAN);
-                double x = this.getX();
-                double y = this.getY();
-                double r = this.getRadius();
+            double x = this.getX();
+            double y = this.getY();
+            double r = this.getRadius();
 
+            // Efeito visual de velocidade
+            if (comBoostVelocidade) {
+                GameLib.setColor(Color.CYAN);
                 GameLib.drawLine(x - r * 0.5, y + r, x - r * 1.5, y + r * 2);
-                GameLib.drawLine(x,           y + r, x,           y + r * 2);
+                GameLib.drawLine(x, y + r, x, y + r * 2);
                 GameLib.drawLine(x + r * 0.5, y + r, x + r * 1.5, y + r * 2);
             }
 
+            // Efeito visual do PowerUp2 (tiros duplicados ou quadruplicados)
+            if (powerUp2Level > 0) {
+                GameLib.setColor(Color.MAGENTA);
+                GameLib.drawDiamond(x, y, r * 1.2);
+
+                GameLib.setColor(Color.WHITE);
+                GameLib.drawDiamond(x, y, r * 0.8);
+
+                GameLib.setColor(Color.CYAN);
+                GameLib.drawLine(x - r * 1.4, y + r * 0.5, x - r * 1.4, y - r * 1.5);
+                GameLib.drawLine(x + r * 1.4, y + r * 0.5, x + r * 1.4, y - r * 1.5);
+            }
+
+            // Desenho principal do player
             GameLib.setColor(Color.RED);
-            GameLib.drawPlayer(this.getX(), this.getY(), this.getRadius());
+            GameLib.drawPlayer(x, y, r);
         }
     }
+
 
     // Getters e setters
 
     public long getInvulneravelAte() {
         return invulneravelAte;
-    }
-
-    public void setInvulneravelAte(long invulneravelAte) {
-        this.invulneravelAte = invulneravelAte;
     }
 
     public double getExplosionStart() {
@@ -266,9 +265,5 @@ public class Player extends Entidade {
 
     public int getVida() {
         return vida;
-    }
-
-    public void setVida(int vida) {
-        this.vida = vida;
     }
 }

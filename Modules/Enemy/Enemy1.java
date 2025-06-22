@@ -13,7 +13,7 @@ public class Enemy1 extends EnemyBase {
     private static long nextEnemy1 = 0;
     private static long enemy2_spawnX = 0;
     private long nextShoot;
-
+t
     public Enemy1(EstadosEnum state, double x, double y, double v, double angle, double RV, double explosionStart, double explosionEnd, double radius, long nextShoot, long nextEnemy1) {
         super(state, x, y, v, angle, RV, explosionStart, explosionEnd, radius);
         Enemy1.nextEnemy1 = nextEnemy1;

@@ -19,6 +19,6 @@ public class Constantes {
     public static final double ENEMY2_SPAWN_X_INICIAL = GameLib.WIDTH * 0.20;
 
     // PowerUp
-    public static final int MAX_POWERUPS = 3;
-    public static final double V_INICIAL = 0.25;
+    public static final int MAX_POWERUPS = 20;
+    public static final double V_INICIAL = 0.2;
 }

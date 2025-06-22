@@ -9,17 +9,14 @@ import java.awt.*;
 public class PowerUp2 extends Entidade implements PowerupInterface {
 
     private double aumentarStatus;
-    private static double nextPowerUp = System.currentTimeMillis() + 3000;
     private long expiracao;
     private boolean efeitoAplicado = false;
 
     public PowerUp2(EstadosEnum state, double x, double y, double radius, double aumentarStatus, double nextPowerUp) {
         super(state, x, y, radius);
         this.aumentarStatus = aumentarStatus;
-        PowerUp2.nextPowerUp = nextPowerUp;
     }
 
-    @Override
     public void atualizaEstadoPowerUp(long delta) {
         if (this.getState() == EstadosEnum.ACTIVE) {
             this.setY(this.getY() + 0.1 * delta);
@@ -30,9 +27,8 @@ public class PowerUp2 extends Entidade implements PowerupInterface {
         }
     }
 
-    @Override
     public void desenhaPowerUp() {
-        if (this.getState() == EstadosEnum.ACTIVE || this.isEfeitoAplicado()) {
+        if (this.getState() == EstadosEnum.ACTIVE) {
             double x = this.getX();
             double y = this.getY();
             double r = this.getRadius();
@@ -58,10 +54,6 @@ public class PowerUp2 extends Entidade implements PowerupInterface {
         }
     }
 
-    public double getNextPowerUp() {
-        return nextPowerUp;
-    }
-
     public double getAumentarStatus() {
         return aumentarStatus;
     }
@@ -70,9 +62,6 @@ public class PowerUp2 extends Entidade implements PowerupInterface {
         this.aumentarStatus = aumentarStatus;
     }
 
-    public void setNextPowerUp(double nextPowerUp) {
-        PowerUp2.nextPowerUp = nextPowerUp;
-    }
 
     public boolean isEfeitoAplicado() {
         return efeitoAplicado;

@@ -67,7 +67,7 @@ public class Phase {
                 0,
                 0,
                 currentTime,
-                3);
+                10);
 
         /* variáveis dos projéteis disparados pelo player */
 
@@ -168,15 +168,16 @@ public class Phase {
         }
     }
 
-    public void verificaSeNovosPowerUpsDevemSerLancados(long currentTime, List<PowerUp1> powerups) {
+    public void verificaSeNovosPowerUpsDevemSerLancados(long currentTime, List<PowerUp1> powerups, List<PowerUp2> powerups2) {
         for (PowerupConfig powerupConfig : this.poweupConfig) {
             if (currentTime >= powerupConfig.getQuando() && !powerupConfig.isLancado()) {
                 powerupConfig.setLancado(true);
 
-                int free = Utils.findFreeIndex(powerups);
+                int free;
 
                 switch (powerupConfig.getTipo()) {
                     case 1:
+                        free = Utils.findFreeIndex(powerups);
 
                         if (free < powerups.size()) {
                             powerups.get(free).setX(powerupConfig.getPosX());
@@ -185,10 +186,16 @@ public class Phase {
                         }
                         break;
                     case 2:
-                        if (free < powerUps2.size()) {
-                            powerUps2.get(free).setX(powerupConfig.getPosX());
-                            powerUps2.get(free).setY(powerupConfig.getPosY());
-                            powerUps2.get(free).setState(EstadosEnum.ACTIVE);
+                        free = Utils.findFreeIndex(powerups2);
+
+                        if (free < powerups2.size()) {
+                            PowerUp2 powerup = powerups2.get(free); // Pega o objeto reutilizado
+
+                            powerup.setEfeitoAplicado(false); // Reseta a "memória" do power-up
+
+                            powerup.setX(powerupConfig.getPosX());
+                            powerup.setY(powerupConfig.getPosY());
+                            powerup.setState(EstadosEnum.ACTIVE);
                         }
                         break;
                 }
@@ -340,7 +347,7 @@ public class Phase {
         // Verifica se o boss deve ser lançado
         this.verificaLancamentosBoss(this.currentTime);
 
-        this.verificaSeNovosPowerUpsDevemSerLancados(this.currentTime, this.powerUps);
+        this.verificaSeNovosPowerUpsDevemSerLancados(this.currentTime, this.powerUps, this.powerUps2);
 
         //
 
@@ -421,11 +428,9 @@ public class Phase {
             this.isMorto = true;
         }
 
-        Utils.desenhaVida(player.getVida());
 
         if (this.boss != null) {
             if (this.boss.getState() == EstadosEnum.ACTIVE) {
-                Utils.desenhaVidaBoss();
                 Utils.desenhaVidaBossAtual(this.boss.getVida());
                 this.boss.desenhaBoss(this.currentTime);
             }

@@ -37,7 +37,7 @@ public class Utils {
 
         int vidas = vida;
         double raio = 7.0;
-        double espacamento = 2 * raio + 5; // espaço entre bolinhas
+        double espacamento = 2 * raio + 5;
         double posXInicial = 35.0;
         double posY = 60.0;
 
@@ -47,16 +47,6 @@ public class Utils {
             double posX = posXInicial + i * espacamento;
             GameLib.drawCircle(posX, posY, raio);
         }
-    }
-
-    public static void desenhaVidaBoss() {
-        double larguraMaxima = 300;
-        double altura = 10;
-        double cx = GameLib.WIDTH/2;
-        double cy = GameLib.HEIGHT - 30;
-
-        GameLib.setColor(Color.WHITE);
-        GameLib.fillRect(cx, cy, larguraMaxima, altura);
     }
 
     public static void desenhaVidaBossAtual(int vidaAtualBoss) {

@@ -8,7 +8,6 @@ import java.awt.*;
 
 public class PowerUp1 extends Entidade implements PowerupInterface {
     private double aumentarStatus;
-    private static double nextPowerUp = System.currentTimeMillis() + 3000;
     private long expiracao;
     private boolean efeitoAplicado = false;
 
@@ -16,7 +15,6 @@ public class PowerUp1 extends Entidade implements PowerupInterface {
     public PowerUp1(EstadosEnum state, double x, double y, double radius, double aumentarStatus, double nextPowerUp) {
         super(state, x, y, radius);
         this.aumentarStatus = aumentarStatus;
-        PowerUp1.nextPowerUp = nextPowerUp;
     }
 
     public void atualizaEstadoPowerUp(long delta) {
@@ -55,21 +53,8 @@ public class PowerUp1 extends Entidade implements PowerupInterface {
         }
     }
 
-
-    public double getNextPowerUp() {
-        return nextPowerUp;
-    }
-
     public double getAumentarStatus() {
         return aumentarStatus;
-    }
-
-    public void setAumentarStatus(double aumentarStatus) {
-        this.aumentarStatus = aumentarStatus;
-    }
-
-    public void setNextPowerUp(double nextPowerUp) {
-        this.nextPowerUp = nextPowerUp;
     }
 
     public boolean isEfeitoAplicado() {
