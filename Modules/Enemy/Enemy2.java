@@ -1,8 +1,8 @@
 package Modules.Enemy;
 
 import GameLib.GameLib;
-import Modules.Others.Entidade;
 import Modules.Enum.EstadosEnum;
+import Modules.Utils.Utils;
 import Modules.Player.Player;
 import Modules.Others.Projetil;
 import Modules.Utils.Constantes;
@@ -23,33 +23,6 @@ public class Enemy2 extends EnemyBase {
         return new Enemy2(EstadosEnum.INACTIVE, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, radius, (long) (Constantes.ENEMY2_SPAWN_X_INICIAL));
     }
 
-    public static <T extends Entidade> int [] findFreeIndex(List<T> stateArray, int amount){
-
-        int i, k;
-        int [] freeArray = new int[amount];
-
-        for(i = 0; i < freeArray.length; i++) freeArray[i] = stateArray.size();
-
-        for(i = 0, k = 0; i < stateArray.size() && k < amount; i++){
-
-            if(stateArray.get(i).getState() == EstadosEnum.INACTIVE) {
-
-                freeArray[k] = i;
-                k++;
-            }
-        }
-
-        return freeArray;
-    }
-
-    public static long getNextEnemy2() {
-        return nextEnemy2;
-    }
-
-    public static void setNextEnemy2(long nextEnemy2) {
-        Enemy2.nextEnemy2 = nextEnemy2;
-    }
-
     public static long getEnemy2_count() {
         return enemy2_count;
     }
@@ -58,80 +31,105 @@ public class Enemy2 extends EnemyBase {
         Enemy2.enemy2_count = enemy2_count;
     }
 
+    // Função de update de estado do enemy1
     public void comportamento(long currentTime, long delta, Player player, List<Projetil> e_projetils) {
-        if(this.getState() == EstadosEnum.EXPLODING){
 
-            if(currentTime > this.getExplosionEnd()){
+        if (getState() == EstadosEnum.EXPLODING) {
+            verificarFimExplosao(currentTime);
+            return;
+        }
 
-                this.setState(EstadosEnum.INACTIVE);
+        if (getState() == EstadosEnum.ACTIVE) {
+            if (verificarSaidaTela()) {
+                setState(EstadosEnum.INACTIVE);
+                return;
+            }
+
+            mover(delta);
+            boolean podeAtirar = ajustarRotacao();
+            if (podeAtirar) {
+                atirar(e_projetils);
+            }
+        }
+    }
+
+    // Função Auxiliar de "Comportamento": verifica se a animação de explosão acabou e deixa o inimigo INACTIVE
+    private void verificarFimExplosao(long currentTime) {
+        if (currentTime > this.getExplosionEnd()) {
+            this.setState(EstadosEnum.INACTIVE);
+        }
+    }
+
+    // Função Auxiliar de "Comportamento": Verifica quando o inimigo sair da tela e torna ele inativo.
+    private boolean verificarSaidaTela() {
+        return getX() < -10 || getX() > GameLib.WIDTH + 10;
+    }
+
+    // Função Auxiliar de "Comportamento": realiza a movimentação do enemy2
+    private void mover(long delta) {
+        double novaX = getX() + getV() * Math.cos(getAngle()) * delta;
+        double novaY = getY() - getV() * Math.sin(getAngle()) * delta;
+        setX(novaX);
+        setY(novaY);
+        setAngle(getAngle() + getRV() * delta);
+    }
+
+    // Função Auxiliar de "Comportamento": Faz o enemy2 rodar
+    private boolean ajustarRotacao() {
+        double limiarY = GameLib.HEIGHT * 0.30;
+
+        if (getY() >= limiarY && getY() - getV() < limiarY) {
+            if (getX() < GameLib.WIDTH / 2.0) {
+                setRV(0.003);
+            } else {
+                setRV(-0.003);
             }
         }
 
-        if(this.getState() == EstadosEnum.ACTIVE){
+        if (getRV() > 0 && Math.abs(getAngle() - 3 * Math.PI) < 0.05) {
+            setRV(0.0);
+            setAngle(3 * Math.PI);
+            return true;
+        }
 
-            /* verificando se inimigo saiu da tela */
-            if(this.getX() < -10 || this.getX() > GameLib.WIDTH + 10 ) {
+        if (getRV() < 0 && Math.abs(getAngle()) < 0.05) {
+            setRV(0.0);
+            setAngle(0.0);
+            return true;
+        }
 
-                this.setState(EstadosEnum.INACTIVE);
-            }
-            else {
+        return false;
+    }
 
-                boolean shootNow = false;
-                double previousY = this.getY();
+    // Função Auxiliar de "Comportamento": faz a função de atirar do enemy2
+    private void atirar(List<Projetil> e_projetils) {
+        double[] angulos = {
+                Math.PI / 2 + Math.PI / 8,
+                Math.PI / 2,
+                Math.PI / 2 - Math.PI / 8
+        };
 
+        int[] indicesLivres = Utils.findFreeIndex(e_projetils, angulos.length);
 
-                this.setX((this.getV() * Math.cos(this.getAngle()) * delta) + this.getX());
-                this.setY(this.getV() * Math.sin(this.getAngle()) * delta * (-1.0) + this.getY());
-                this.setAngle(this.getRV() * delta + this.getAngle());
+        for (int i = 0; i < indicesLivres.length; i++) {
+            int index = indicesLivres[i];
+            if (index < e_projetils.size()) {
+                double anguloAleatorio = angulos[i] + (Math.random() * Math.PI / 6 - Math.PI / 12);
+                double vx = Math.cos(anguloAleatorio) * 0.30;
+                double vy = Math.sin(anguloAleatorio) * 0.30;
 
-                double threshold = GameLib.HEIGHT * 0.30;
-
-                if(previousY < threshold && this.getY() >= threshold) {
-
-                    if(this.getX() < (double) GameLib.WIDTH / 2) this.setRV(0.003);
-                    else this.setRV(-0.003);
-                }
-
-                if(this.getRV() > 0 && Math.abs(this.getAngle() - 3 * Math.PI) < 0.05){
-                    this.setRV(0.0);
-                    this.setAngle(3 * Math.PI);
-                    shootNow = true;
-                }
-
-                if(this.getRV() < 0 && Math.abs(this.getAngle()) < 0.05){
-                    this.setRV(0.0);
-                    this.setAngle(0.0);
-                    shootNow = true;
-                }
-
-                if(shootNow){
-
-                    double [] angles = { Math.PI/2 + Math.PI/8, Math.PI/2, Math.PI/2 - Math.PI/8 };
-                    int [] freeArray = findFreeIndex(e_projetils, angles.length);
-
-                    for(int k = 0; k < freeArray.length; k++){
-
-                        int free = freeArray[k];
-
-                        if(free < e_projetils.size()){
-
-                            double a = angles[k] + Math.random() * Math.PI/6 - Math.PI/12;
-                            double vx = Math.cos(a);
-                            double vy = Math.sin(a);
-
-                            e_projetils.get(free).setX(this.getX());
-                            e_projetils.get(free).setY(this.getY());
-                            e_projetils.get(free).setVX(vx * 0.30);
-                            e_projetils.get(free).setVY(vy * 0.30);
-                            e_projetils.get(free).setState(EstadosEnum.ACTIVE);
-                        }
-                    }
-                }
+                Projetil p = e_projetils.get(index);
+                p.setX(getX());
+                p.setY(getY());
+                p.setVX(vx);
+                p.setVY(vy);
+                p.setState(EstadosEnum.ACTIVE);
             }
         }
     }
 
 
+    // desenha o enemy2
     public void desenhaInimigo(long currentTime) {
         if(this.getState() == EstadosEnum.EXPLODING){
 
@@ -148,9 +146,5 @@ public class Enemy2 extends EnemyBase {
 
     public static long getEnemy2_spawnX() {
         return enemy2_spawnX;
-    }
-
-    public static void setEnemy2_spawnX(long enemy2_spawnX) {
-        Enemy2.enemy2_spawnX = enemy2_spawnX;
     }
 }

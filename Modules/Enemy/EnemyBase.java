@@ -20,6 +20,7 @@ public abstract class EnemyBase extends Entidade {
         this.explosionEnd = explosionEnd;
     }
 
+    // Verifica colisão com projetils
     public boolean verificaColisaoComProjetil(Projetil projetil, long currentTime) {
         if (this.getState() != EstadosEnum.ACTIVE || projetil.getState() != EstadosEnum.ACTIVE) return false;
 
@@ -39,8 +40,6 @@ public abstract class EnemyBase extends Entidade {
 
         return false;
     }
-
-
 
     public double getV() {
         return V;

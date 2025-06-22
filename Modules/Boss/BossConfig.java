@@ -1,6 +1,8 @@
 package Modules.Boss;
 
-public class BossConfig {
+public final class BossConfig {
+    /* Classe que armazena cada linha do arquivo de fase, cada instancia dessa classe na lista é um boss */
+
     private int tipo;
     private long quando;
     private int pontosVida;
@@ -20,40 +22,20 @@ public class BossConfig {
         return tipo;
     }
 
-    public void setTipo(int tipo) {
-        this.tipo = tipo;
-    }
-
     public long getQuando() {
         return quando;
-    }
-
-    public void setQuando(long quando) {
-        this.quando = quando;
     }
 
     public int getPontosVida() {
         return pontosVida;
     }
 
-    public void setPontosVida(int pontosVida) {
-        this.pontosVida = pontosVida;
-    }
-
     public double getPosX() {
         return posX;
     }
 
-    public void setPosX(double posX) {
-        this.posX = posX;
-    }
-
     public double getPosY() {
         return posY;
-    }
-
-    public void setPosY(double posY) {
-        this.posY = posY;
     }
 
     public boolean isLancado() {

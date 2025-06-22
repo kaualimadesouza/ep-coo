@@ -6,14 +6,12 @@ import Modules.Others.Projetil;
 import java.util.List;
 
 public interface BossInterface {
+    /* Interface responsavel pelos atributos de um Boss */
+
     boolean verificaColisaoComProjetil(Projetil projetil, long currentTime);
-    boolean isLancado();
     void setLancado(boolean lancado);
     int getVida();
-    void setVida(int vida);
-    long getNextShoot();
-    void setNextShoot(long nextShoot);
-    boolean estaDerrotado();
+    boolean isDerrotado();
     EstadosEnum getState();
     void update(long currentTime, List<Projetil> e_projetils);
     void desenhaBoss(long currentTime);

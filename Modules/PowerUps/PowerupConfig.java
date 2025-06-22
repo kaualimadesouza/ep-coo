@@ -17,39 +17,18 @@ public class PowerupConfig {
     public int getTipo() {
         return tipo;
     }
-
-    public void setTipo(int tipo) {
-        this.tipo = tipo;
-    }
-
     public long getQuando() {
         return quando;
     }
-
-    public void setQuando(long quando) {
-        this.quando = quando;
-    }
-
     public double getPosX() {
         return posX;
     }
-
-    public void setPosX(double posX) {
-        this.posX = posX;
-    }
-
     public double getPosY() {
         return posY;
     }
-
-    public void setPosY(double posY) {
-        this.posY = posY;
-    }
-
     public boolean isLancado() {
         return isLancado;
     }
-
     public void setLancado(boolean lancado) {
         isLancado = lancado;
     }

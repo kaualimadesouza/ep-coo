@@ -13,7 +13,7 @@ import Modules.Enum.EstadosEnum;
 import Modules.Others.Fundo;
 import Modules.PowerUps.PowerUp1;
 import Modules.Others.Projetil;
-import Modules.Others.Utils;
+import Modules.Utils.Utils;
 import Modules.Player.Player;
 import Modules.PowerUps.PowerUp2;
 import Modules.PowerUps.PowerupConfig;
@@ -271,7 +271,7 @@ public class Phase {
             player.MortePlayer(this.enemies, this.currentTime);
             player.MortePlayer(this.enemies2, this.currentTime);
             player.colisaoPowerUp(this.powerUps, this.currentTime);
-            player.colisaoPowerUp2(this.powerUps2, this.currentTime);
+            player.colisaoPowerUp(this.powerUps2, this.currentTime);
 
         }
 
@@ -424,6 +424,8 @@ public class Phase {
             powerUp.desenhaPowerUp();
         }
 
+        Utils.desenhaVidaPlayer(player.getVida());
+
         if(player.getVida() == 0) {
             this.isMorto = true;
         }
@@ -435,7 +437,7 @@ public class Phase {
                 this.boss.desenhaBoss(this.currentTime);
             }
 
-            if (this.boss.estaDerrotado() && !this.isCompleted) {
+            if (this.boss.isDerrotado() && !this.isCompleted) {
                 this.isCompleted = true;
                 System.out.println("Fase vencida!");
             }

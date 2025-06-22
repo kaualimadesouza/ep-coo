@@ -3,9 +3,11 @@ package Modules.Player;
 import GameLib.GameLib;
 import Modules.Enum.EstadosEnum;
 import Modules.Others.Entidade;
+import Modules.Utils.Utils;
 import Modules.PowerUps.PowerUp1;
 import Modules.Others.Projetil;
 import Modules.PowerUps.PowerUp2;
+import Modules.PowerUps.PowerupInterface;
 import Modules.Utils.Constantes;
 
 import java.awt.*;
@@ -50,15 +52,6 @@ public class Player extends Entidade {
         this.setVY(Constantes.V_INICIAL);
     }
 
-    public static int findFreeIndex(List<? extends Entidade> entidades, int startIndex) {
-        for (int i = startIndex; i < entidades.size(); i++) {
-            if (entidades.get(i).getState() == EstadosEnum.INACTIVE) {
-                return i;
-            }
-        }
-        return entidades.size(); // Nenhum livre encontrado
-    }
-
     public void verificaEntradaUsuario(List<Projetil> projetils, long currentTime, long delta) {
         if (this.getState() == EstadosEnum.ACTIVE) {
 
@@ -75,12 +68,13 @@ public class Player extends Entidade {
 
                     int lastFree = 0;
 
+                    // Disparo tiro com powerup2
                     if (currentTime < powerUp2Expiracao && powerUp2Level > 0) {
                         int numTiros = (int) Math.pow(2, powerUp2Level);
                         double espacamento = 15.0;
 
                         for (int i = 0; i < numTiros; i++) {
-                            int free = Player.findFreeIndex(projetils, lastFree);
+                            int free = Utils.findFreeIndexPlayer(projetils, lastFree);
                             if (free >= projetils.size()) break;
 
                             double deslocamentoX = (i - (numTiros - 1) / 2.0) * espacamento;
@@ -96,7 +90,7 @@ public class Player extends Entidade {
                         }
                     } else {
                         // Tiro simples sem power-up
-                        int free = Player.findFreeIndex(projetils, lastFree);
+                        int free = Utils.findFreeIndexPlayer(projetils, lastFree);
                         if (free < projetils.size()) {
                             Projetil p = projetils.get(free);
                             p.setX(this.getX());
@@ -113,6 +107,7 @@ public class Player extends Entidade {
         }
     }
 
+    // Metodo generico que verifica a morte do player com qualquer entidade
     public <T extends Entidade> void MortePlayer(List<T> entidades, long currentTime) {
         if (currentTime < this.getInvulneravelAte()) return;
 
@@ -136,41 +131,35 @@ public class Player extends Entidade {
         }
     }
 
-    public void colisaoPowerUp(List<PowerUp1> powerUps, long currentTime) {
-        for (PowerUp1 powerup : powerUps) {
+    // Verifica colisão com powerup1
+    public <T extends PowerupInterface> void colisaoPowerUp(List<T> powerUps, long currentTime) {
+        for (T powerup : powerUps) {
             double dx = powerup.getX() - this.getX();
             double dy = powerup.getY() - this.getY();
             double dist = Math.sqrt(dx * dx + dy * dy);
 
-            if (dist < (this.getRadius() + powerup.getRadius()) * 0.8) {
-                if (!powerup.isEfeitoAplicado()) {
-                    this.setVX(this.getVX() * powerup.getAumentarStatus());
-                    this.setVY(this.getVY() * powerup.getAumentarStatus());
-                    powerup.setExpiracao(currentTime + 30000);
-                    powerup.setEfeitoAplicado(true);
-                    this.comBoostVelocidade = true;
+            if (powerup instanceof PowerUp2) {
+                if (dist < (this.getRadius() + powerup.getRadius()) * 1.2) {
+                    if (!powerup.isEfeitoAplicado()) {
+                        this.powerUp2Level++;
+                        this.powerUp2Expiracao = currentTime + 30000;
+                        powerup.setEfeitoAplicado(true);
+                    }
+                    powerup.setState(EstadosEnum.INACTIVE);
                 }
-                powerup.setState(EstadosEnum.INACTIVE);
+            } else {
+                if (dist < (this.getRadius() + powerup.getRadius()) * 0.8) {
+                    if (!powerup.isEfeitoAplicado()) {
+                        this.setVX(this.getVX() * powerup.getAumentarStatus());
+                        this.setVY(this.getVY() * powerup.getAumentarStatus());
+                        powerup.setExpiracao(currentTime + 30000);
+                        powerup.setEfeitoAplicado(true);
+                        this.comBoostVelocidade = true;
+                    }
+                    powerup.setState(EstadosEnum.INACTIVE);
+                }
             }
         }
-    }
-
-    public void colisaoPowerUp2(List<PowerUp2> powerUps2, long currentTime) {
-        for (PowerUp2 powerup : powerUps2) {
-            double dx = powerup.getX() - this.getX();
-            double dy = powerup.getY() - this.getY();
-            double dist = Math.sqrt(dx * dx + dy * dy);
-
-            if (dist < (this.getRadius() + powerup.getRadius()) * 1.2) {
-                if (!powerup.isEfeitoAplicado()) {
-                    this.powerUp2Level++;
-                    this.powerUp2Expiracao = currentTime + 30000;
-                    powerup.setEfeitoAplicado(true);
-                }
-                powerup.setState(EstadosEnum.INACTIVE);
-            }
-        }
-
     }
 
     public void atualizarPowerUp2(long currentTime) {

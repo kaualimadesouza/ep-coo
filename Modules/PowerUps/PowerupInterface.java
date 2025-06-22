@@ -10,14 +10,9 @@ public interface PowerupInterface {
     double getX();
     double getY();
     double getRadius();
-
     boolean isEfeitoAplicado();
-
     double getAumentarStatus();
-
     void setExpiracao(long l);
-
     void setEfeitoAplicado(boolean b);
-
     void setState(EstadosEnum estadosEnum);
 }

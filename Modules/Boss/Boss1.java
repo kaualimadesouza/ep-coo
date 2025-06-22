@@ -41,15 +41,20 @@ public class Boss1 extends EnemyBase implements BossInterface {
 
     @Override
     public boolean verificaColisaoComProjetil(Projetil projetil, long currentTime) {
+        // Verifica se o boss nao está ativo e se o projetil nao está ativo, se nao estiver retorna false
+        // Para prevenir coisas inativas de interagir
         if (this.getState() != EstadosEnum.ACTIVE || projetil.getState() != EstadosEnum.ACTIVE) return false;
 
+        // Verifica se colidiu com alguma das bolas do boss
+        // As bola aqui não mostram no desenho, mas o target que se o projetil atinge e causa dano
         boolean colidiu =
                 colisaoComCirculo(getX(), getY(), projetil) ||
-                        colisaoComCirculo(getX() + 35, getY(), projetil) ||
-                        colisaoComCirculo(getX() - 35, getY(), projetil) ||
-                        colisaoComCirculo(getX(), getY() + 35, projetil) ||
-                        colisaoComCirculo(getX(), getY() - 35, projetil);
+                colisaoComCirculo(getX() + 35, getY(), projetil) ||
+                colisaoComCirculo(getX() - 35, getY(), projetil) ||
+                colisaoComCirculo(getX(), getY() + 35, projetil) ||
+                colisaoComCirculo(getX(), getY() - 35, projetil);
 
+        // Se colidiu, o projeto se torna inativo
         if (colidiu) {
             projetil.setState(EstadosEnum.INACTIVE);
             this.vida--;
@@ -64,6 +69,7 @@ public class Boss1 extends EnemyBase implements BossInterface {
         return colidiu;
     }
 
+    // Função que verifica colisão com circulo
     private boolean colisaoComCirculo(double cx, double cy, Projetil p) {
         double dx = cx - p.getX();
         double dy = cy - p.getY();
@@ -71,6 +77,7 @@ public class Boss1 extends EnemyBase implements BossInterface {
         return dist < (this.getRadius() + p.getRadius());
     }
 
+    // Atualiza o estádo do boss
     public void update(long currentTime, List<Projetil> e_projetils) {
         if (this.getState() == EstadosEnum.EXPLODING && currentTime > this.getExplosionEnd()) {
             this.setState(EstadosEnum.INACTIVE);
@@ -195,8 +202,7 @@ public class Boss1 extends EnemyBase implements BossInterface {
                 GameLib.drawLine(x - size / 2, lineY, x + size / 2, lineY);
             }
 
-            // --- RAIO ELÉTRICO EM VOLTA ---
-
+            // RAIO ELÉTRICO EM VOLTA
             GameLib.setColor(Color.CYAN);
             double raioMax = size * 1.2;
             int nRaios = 12;
@@ -219,41 +225,15 @@ public class Boss1 extends EnemyBase implements BossInterface {
         }
     }
 
-
-
-
-    @Override
-    public boolean isLancado() {
-        return isLancado;
-    }
-
-    @Override
     public void setLancado(boolean lancado) {
         this.isLancado = lancado;
     }
 
-    @Override
     public int getVida() {
         return vida;
     }
 
-    @Override
-    public void setVida(int vida) {
-        this.vida = vida;
-    }
-
-    @Override
-    public long getNextShoot() {
-        return nextShoot;
-    }
-
-    @Override
-    public void setNextShoot(long nextShoot) {
-        this.nextShoot = nextShoot;
-    }
-
-    @Override
-    public boolean estaDerrotado() {
+    public boolean isDerrotado() {
         return this.getState() == EstadosEnum.INACTIVE;
     }
 }

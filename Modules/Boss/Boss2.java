@@ -12,12 +12,11 @@ public class Boss2 extends EnemyBase implements BossInterface {
 
     private long nextShoot;
     private int vida;
-    private boolean isLancado = false;
-
     private long lastPatternChange = 0;
     private int currentPattern = 0;
     private double velocityX = 0;
     private double velocityY = 0;
+    private boolean isLancado = false;
 
     public Boss2(EstadosEnum state, double x, double y, double v, double angle, double RV,
                  double explosionStart, double explosionEnd, double radius,
@@ -45,15 +44,21 @@ public class Boss2 extends EnemyBase implements BossInterface {
 
     @Override
     public boolean verificaColisaoComProjetil(Projetil projetil, long currentTime) {
+        // Verifica se o boss nao está ativo e se o projetil nao está ativo, se nao estiver retorna false
+        // Para prevenir coisas inativas de interagir
         if (this.getState() != EstadosEnum.ACTIVE || projetil.getState() != EstadosEnum.ACTIVE) return false;
 
+
+        // Verifica se colidiu com alguma das bolas do boss
         boolean colidiu =
                 colisaoComCirculo(getX(), getY(), projetil) ||
-                        colisaoComCirculo(getX() + 35, getY(), projetil) ||
-                        colisaoComCirculo(getX() - 35, getY(), projetil) ||
-                        colisaoComCirculo(getX(), getY() + 35, projetil) ||
-                        colisaoComCirculo(getX(), getY() - 35, projetil);
+                colisaoComCirculo(getX() + 35, getY(), projetil) ||
+                colisaoComCirculo(getX() - 35, getY(), projetil) ||
+                colisaoComCirculo(getX(), getY() + 35, projetil) ||
+                colisaoComCirculo(getX(), getY() - 35, projetil);
 
+
+        // Se colidiu, o projeto se torna inativo
         if (colidiu) {
             projetil.setState(EstadosEnum.INACTIVE);
             this.vida--;
@@ -67,7 +72,7 @@ public class Boss2 extends EnemyBase implements BossInterface {
 
         return colidiu;
     }
-
+    // Função que verifica colisão com circulo
     private boolean colisaoComCirculo(double cx, double cy, Projetil p) {
         double dx = cx - p.getX();
         double dy = cy - p.getY();
@@ -75,12 +80,16 @@ public class Boss2 extends EnemyBase implements BossInterface {
         return dist < (this.getRadius() + p.getRadius());
     }
 
+    // Atualiza o estádo do boss
     public void update(long currentTime, List<Projetil> e_projetils) {
+
+        // Se está explodindo e o tempo de explosão acabou pode tornar inativo o boss
         if (this.getState() == EstadosEnum.EXPLODING && currentTime > this.getExplosionEnd()) {
             this.setState(EstadosEnum.INACTIVE);
             return;
         }
 
+        // Aqui se define o comportamento do boss 2
         if (this.getState() == EstadosEnum.ACTIVE) {
 
             // Atualiza velocidade aleatória a cada 2 segundos
@@ -100,8 +109,7 @@ public class Boss2 extends EnemyBase implements BossInterface {
             // Mantém dentro dos limites da tela
             double r = this.getRadius();
             newX = Math.max(r, Math.min(GameLib.WIDTH - r, newX));
-            newY = Math.max(r, Math.min(GameLib.HEIGHT / 2, newY)); // Boss fica na metade superior da tela
-
+            newY = Math.max(r, Math.min(GameLib.HEIGHT / 2, newY));
             this.setX(newX);
             this.setY(newY);
 
@@ -197,12 +205,6 @@ public class Boss2 extends EnemyBase implements BossInterface {
         }
     }
 
-    @Override
-    public boolean isLancado() {
-        return isLancado;
-    }
-
-    @Override
     public void setLancado(boolean lancado) {
         this.isLancado = lancado;
     }
@@ -213,22 +215,8 @@ public class Boss2 extends EnemyBase implements BossInterface {
     }
 
     @Override
-    public void setVida(int vida) {
-        this.vida = vida;
-    }
-
-    @Override
-    public long getNextShoot() {
-        return nextShoot;
-    }
-
-    @Override
-    public void setNextShoot(long nextShoot) {
-        this.nextShoot = nextShoot;
-    }
-
-    @Override
-    public boolean estaDerrotado() {
+    public boolean isDerrotado() {
         return this.getState() == EstadosEnum.INACTIVE;
     }
 }
+

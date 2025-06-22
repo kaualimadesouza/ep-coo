@@ -26,8 +26,6 @@ public abstract class Entidade {
         this.radius = radius;
     }
 
-
-
     public double getRadius() {
         return radius;
     }

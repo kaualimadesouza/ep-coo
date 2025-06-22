@@ -18,7 +18,7 @@ public class Fundo {
         this.background_speed = speed;
         this.background_count = 0.0;
 
-        // Inicializa as estrelas aqui mesmo
+        // Inicializa as estrelas
         for (int i = 0; i < numeroDeEstrelas; i++) {
             this.background_X.add(Math.random() * GameLib.WIDTH);
             this.background_Y.add(Math.random() * GameLib.HEIGHT);
@@ -51,37 +51,5 @@ public class Fundo {
         for (int i = 0; i < background_X.size(); i++) {
             GameLib.fillRect(background_X.get(i), (background_Y.get(i) + background_count) % GameLib.HEIGHT, 2, 2);
         }
-    }
-
-    public List<Double> getBackground_X() {
-        return background_X;
-    }
-
-    public void setBackground_X(List<Double> background_X) {
-        this.background_X = background_X;
-    }
-
-    public List<Double> getBackground_Y() {
-        return background_Y;
-    }
-
-    public void setBackground_Y(List<Double> background_Y) {
-        this.background_Y = background_Y;
-    }
-
-    public double getBackground_speed() {
-        return background_speed;
-    }
-
-    public void setBackground_speed(double background_speed) {
-        this.background_speed = background_speed;
-    }
-
-    public double getBackground_count() {
-        return background_count;
-    }
-
-    public void setBackground_count(double background_count) {
-        this.background_count = background_count;
     }
 }

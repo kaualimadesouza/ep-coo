@@ -57,24 +57,8 @@ public class PowerUp2 extends Entidade implements PowerupInterface {
     public double getAumentarStatus() {
         return aumentarStatus;
     }
-
-    public void setAumentarStatus(double aumentarStatus) {
-        this.aumentarStatus = aumentarStatus;
-    }
-
-
-    public boolean isEfeitoAplicado() {
-        return efeitoAplicado;
-    }
-
-    public void setEfeitoAplicado(boolean efeitoAplicado) {
-        this.efeitoAplicado = efeitoAplicado;
-    }
-
-    public long getExpiracao() {
-        return expiracao;
-    }
-
+    public boolean isEfeitoAplicado() { return efeitoAplicado; }
+    public void setEfeitoAplicado(boolean efeitoAplicado) { this.efeitoAplicado = efeitoAplicado; }
     public void setExpiracao(long expiracao) {
         this.expiracao = expiracao;
     }
