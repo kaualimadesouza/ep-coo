@@ -1,11 +1,11 @@
 package Modules.Enemy;
 
 public class EnemyConfig {
-    public int tipo;
-    public long quando;
-    public double posX;
-    public double posY;
-    public boolean isLancado = false;
+    private int tipo;
+    private long quando;
+    private double posX;
+    private double posY;
+    private boolean isLancado = false;
 
     public EnemyConfig(int tipo, long quando, double posX, double posY) {
         this.tipo = tipo;

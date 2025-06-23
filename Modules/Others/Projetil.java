@@ -38,7 +38,6 @@ public class Projetil extends Entidade{
 
             /* verificando se projétil saiu da tela */
             if(this.getY() > GameLib.HEIGHT) {
-
                 this.setState(EstadosEnum.INACTIVE);
             }
             else {
